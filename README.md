@@ -15,7 +15,6 @@ Before you begin, ensure you have the following:
 Clone this repository to your local machine using:
 
 ```sh
-Copy code
 git clone <repository-url>
 cd <repository-directory>
 ```
@@ -25,7 +24,6 @@ cd <repository-directory>
 Create a new Conda environment using the environment.yml file included in the project:
 
 ```sh
-Copy code
 conda env create -f environment.yml
 ```
 
@@ -36,7 +34,6 @@ This will create a new environment named discord-notion-bot (or another name if 
 Activate the newly created Conda environment:
 
 ```sh
-Copy code
 conda activate discord-notion-bot
 ```
 
@@ -45,7 +42,6 @@ conda activate discord-notion-bot
 Create a secrets.yml file in the project directory with your Discord bot token and Notion integration details:
 
 ```yaml
-Copy code
 discord_bot_token: "YOUR_DISCORD_BOT_TOKEN"
 notion_integration_token: "YOUR_NOTION_INTEGRATION_TOKEN"
 notion_database_id: "YOUR_NOTION_DATABASE_ID"
