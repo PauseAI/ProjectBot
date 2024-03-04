@@ -5,9 +5,9 @@ This repository contains a python script running a Discord bot that fetches info
 ## Prerequisites
 Before you begin, ensure you have the following:
 
-- Anaconda or Miniconda installed on your system. You can download Anaconda here or Miniconda here.
-- A Discord bot token. Follow the instructions here to create a bot and obtain your token.
-- A Notion integration token and a database ID. Follow the setup instructions here to create an integration and share a database with it.
+- Anaconda or Miniconda installed on your system. You can download Anaconda [here](https://www.anaconda.com/products/individual) or Miniconda [here](https://docs.conda.io/en/latest/miniconda.html).
+- A Discord bot token. Follow the instructions [here](https://discordpy.readthedocs.io/en/latest/discord.html) to create a bot and obtain your token.
+- A Notion integration token and a database ID. Follow the setup instructions [here](https://developers.notion.com/docs/getting-started) to create an integration and share a database with it.
 
 # Setup
 1. **Clone the Repository**
