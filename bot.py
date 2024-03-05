@@ -42,10 +42,12 @@ async def on_message(message):
                 print(f"URL: {thread_url}")
                 # Add the entry to the database
                 entry_properties = properties_from_message(msg)
+                page_content = page_content_from_msg(msg)
                 try:
                     notion_response = notion.pages.create(
                         parent={"database_id": database_id},
-                        properties=entry_properties
+                        properties=entry_properties,
+                        children=page_content
                     )
                     print("New entry added to the database successfully.", flush=True)
                     # Constructing the response message
@@ -85,5 +87,25 @@ def properties_from_message(msg):
         }
     }
     return entry_properties
+
+def page_content_from_msg(msg):
+    page_content = [
+        {
+            "object": "block",
+            "type": "paragraph",
+            "paragraph": {
+                "rich_text": [
+                    {
+                        "type": "text",
+                        "text": {
+                            "content": msg.clean_content,
+                        },
+                    },
+                ],
+            },
+        },
+        # You can add more blocks here as needed
+    ]
+    return page_content
 
 client.run(secrets["discord_bot_secret"])
