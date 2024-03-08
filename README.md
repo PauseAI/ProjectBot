@@ -27,14 +27,14 @@ Create a new Conda environment using the environment.yml file included in the pr
 conda env create -f environment.yml
 ```
 
-This will create a new environment named discord-notion-bot (or another name if specified in the environment.yml file) with all the necessary Python dependencies installed.
+This will create a new environment named projectbot with all the necessary Python dependencies installed.
 
 3. **Activate the Environment**
 
 Activate the newly created Conda environment:
 
 ```sh
-conda activate discord-notion-bot
+conda activate projectbot
 ```
 
 4. **Configure Secrets**

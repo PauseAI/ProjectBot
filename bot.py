@@ -34,7 +34,7 @@ async def on_message(message):
             async for msg in thread.history(oldest_first=True, limit=1):
                 thread_url = f"https://discord.com/channels/{msg.guild.id}/{msg.channel.id}"
                 print(f"Title: {msg.channel.name}")
-                print(f"Original Post Content: {msg.content}")
+                #print(f"Original Post Content: {msg.clean_content}")
                 print(f"Author: {msg.author.display_name}")
                 print(f"Tags:")
                 for tag in msg.channel.applied_tags:
