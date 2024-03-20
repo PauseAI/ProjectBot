@@ -1,6 +1,7 @@
 import discord
 from notion_client import Client
 import yaml
+from data_extraction import extract_tasks_from_description
 
 with open('secrets.yml', 'r') as file:
     secrets = yaml.safe_load(file)
@@ -43,6 +44,7 @@ async def on_message(message):
                 # Add the entry to the database
                 entry_properties = properties_from_message(msg)
                 page_content = page_content_from_msg(msg)
+                extracted_tasks = extract_tasks_from_description(msg.clean_content)
                 try:
                     notion_response = notion.pages.create(
                         parent={"database_id": database_id},
@@ -50,6 +52,17 @@ async def on_message(message):
                         children=page_content
                     )
                     print("New entry added to the database successfully.", flush=True)
+                    if extracted_tasks is None:
+                        print("Failure during tasks extraction")
+                    else:
+                        for extracted_task in extracted_tasks:
+                            task_properties = get_task_properties(extracted_task, notion_response["id"])
+                            notion.pages.create(
+                                parent={"database_id": secrets["notion_tasks_id"]},
+                                properties=task_properties
+                            )
+                            print("New task added to the database succesfully")
+
                     # Constructing the response message
                     response_message = (
                         f"Project Tracker: {notion_response['public_url']}"
@@ -61,6 +74,35 @@ async def on_message(message):
                     print(f"An error occurred: {e}", flush=True)
         else:
             await message.channel.send("This command is only supported in forum channels.")
+
+def get_task_properties(task, project_id):
+    properties = {
+        "Name": {
+            "title": [
+                {
+                    "text": {
+                        "content": task["task"]
+                    }
+                }
+            ]
+        },
+        "Skills": {
+            "multi_select": [{"name": skill} for skill in task["skills"]]
+        },
+        "Involvement": {
+            "select": {
+                "name": task["involvement"]
+            }
+        },
+        "Projects": {
+            "relation": [
+                {
+                    "id": project_id
+                }
+            ]
+        }
+    }
+    return properties
 
 def properties_from_message(msg):
     thread_url = f"https://discord.com/channels/{msg.guild.id}/{msg.channel.id}"

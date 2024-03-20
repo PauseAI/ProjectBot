@@ -9,24 +9,27 @@ with open('secrets.yml', 'r') as file:
 client = OpenAI(api_key = secrets["openai_api_key"], organization="org-DP5OE4ilCc68WugMCjHvlNCN")
 
 def retries(f):
+    """
+    Allows to retry multiple times until we get an extraction that worked
+    """
     def inner(*args, n_retries=3, **kwargs):
         for i in range(n_retries):
-            print(f"loop {i}")
             result = f(*args, **kwargs)
             if result:
                 return result
+            print(f"retry {i}")
     return inner
 
 @retries
-def extract_info_from_description(project_description):
-    """Sends a prompt to ChatGPT to extract relevant data from the 
+def extract_tasks_from_description(project_description):
+    """Sends a prompt to ChatGPT to extract list of tasks from the 
        project description.
 
     Args:
         project_description (str): The description of the project.
 
     Returns:
-        str: The extracted information as returned by ChatGPT.
+        list: A list of dictionaries. Each element corresponds to a task.
     """
 
     expected_schema = {
@@ -97,8 +100,6 @@ def extract_info_from_description(project_description):
         print(f"Error decoding JSON: {e}")
         return None  # Indicate failure
 
-# Add more functions for other ChatGPT interactions as needed
-
 test_desc = """
 There are many excellent resources across the Discord server, but Discord is optimized for ongoing conversation and useful knowledge and created materials are often lost. The official drive was sometimes hard to find, and several volunteers have their own collection of documents, notes, tips, strategies, lessons learned, etc. Many of these would be useful to other members.
 
@@ -118,5 +119,5 @@ Tiny: Give feedback about the Google Drive
 Medium: Write definitive informational documents about various volunteer actions
 """
 if __name__ == "__main__":
-    result = extract_info_from_description(test_desc)
+    result = extract_tasks_from_description(test_desc)
     print(result)
