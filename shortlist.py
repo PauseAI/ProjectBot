@@ -34,6 +34,7 @@ notion = Client(auth=secrets["notion_integration_token"])
 # The ID of the database you want to retrieve properties from
 PROJECTS_DATABASE_ID = secrets["notion_database_id"]
 TASKS_DATABASE_ID = secrets["notion_tasks_id"]
+DESCRIPTION = True
 
 def get_project(project) -> Project:
     return Project(
@@ -52,7 +53,7 @@ def get_task(task) -> Task:
     return Task(
         id = task["id"],
         name=task['properties']['Name']['title'][0]['plain_text'],
-        involvement=task["properties"]["Involvement"]["select"]["name"],
+        involvement=task["properties"]["Involvement"]["select"]["name"] if task["properties"]["Involvement"]["select"] else "",
         needs_help = task["properties"]["Needs Help"]["checkbox"],
         skills=[skill["name"] for skill in task["properties"]["Skills"]["multi_select"]],
         special_skills=[skill["name"] for skill in task["properties"]["Specialised Skills"]["multi_select"]],
@@ -66,8 +67,8 @@ def format_project(project: Project):
     skills = ", ".join('`' + skill + '`' for skill in task.skills)
     project_markdown += f" {skills}"
     project_markdown += "\n"
-    #if project['properties']['Short Description']['rich_text']:  # Handle optional description
-    #    project_markdown += f"{project['properties']['Short Description']['rich_text'][0]['plain_text']}\n"
+    if DESCRIPTION and project.description:  # Handle optional description
+        project_markdown += project.description+"\n"
 
     if project.needs_leadership:
         project_markdown += "- 💡Needs Project Leadership💡\n"
