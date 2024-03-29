@@ -16,6 +16,7 @@ async def confirm_dialogue(bot, context: commands.Context, title: str, descripti
         return interaction.user == context.author and interaction.channel.type == discord.ChannelType.private
     try:
         interaction = await bot.wait_for('interaction', check=check, timeout=60.0)
+        await interaction.response.defer()
         if interaction.data["custom_id"] == f"yes_{id}":
             return True
         elif interaction.data["custom_id"] == f"no_{id}":
