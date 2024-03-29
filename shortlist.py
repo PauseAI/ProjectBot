@@ -1,7 +1,7 @@
 from notion_client import Client
-import yaml
 from dataclasses import dataclass
 from typing import List
+from config import secrets
 
 @dataclass
 class Project:
@@ -25,15 +25,12 @@ class Task:
     special_skills: list[str] = None
     projects: list[str] = None
 
-with open('secrets.yml', 'r') as file:
-    secrets = yaml.safe_load(file)
-
 # Initialize the Notion client with your integration token
 notion = Client(auth=secrets["notion_integration_token"])
 
 # The ID of the database you want to retrieve properties from
-PROJECTS_DATABASE_ID = secrets["notion_database_id"]
-TASKS_DATABASE_ID = secrets["notion_tasks_id"]
+PROJECTS_DATABASE_ID = secrets["projects_db_id"]
+TASKS_DATABASE_ID = secrets["tasks_db_id"]
 DESCRIPTION = True
 
 def get_project(project) -> Project:
