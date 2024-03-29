@@ -57,11 +57,14 @@ async def on_message(message):
                     else:
                         for extracted_task in extracted_tasks:
                             task_properties = get_task_properties(extracted_task, notion_response["id"])
-                            notion.pages.create(
-                                parent={"database_id": secrets["notion_tasks_id"]},
-                                properties=task_properties
-                            )
-                            print("New task added to the database succesfully")
+                            print("Task: ", extracted_task["task"])
+                            x = input("Create? [y/n]")
+                            if x=="y":
+                                notion.pages.create(
+                                    parent={"database_id": secrets["notion_tasks_id"]},
+                                    properties=task_properties
+                                )
+                                print("New task added to the database succesfully")
 
                     # Constructing the response message
                     response_message = (
