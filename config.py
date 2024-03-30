@@ -11,8 +11,11 @@ admin_user_ids = [
 ]
 
 # ----- SECRETS -------------------
-with open('secrets.yml', 'r') as file:
-    secrets = yaml.safe_load(file)
+try:
+    with open('secrets.yml', 'r') as file:
+        secrets = yaml.safe_load(file)
+except FileNotFoundError:
+    secrets = {}
 
 discord_bot_secret = ( os.environ["DISCORD_BOT_SECRET"] 
                       if "DISCORD_BOT_SECRET" in os.environ 
