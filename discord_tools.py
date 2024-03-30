@@ -3,7 +3,7 @@ from discord.ext import commands
 import random
 import asyncio
 
-async def confirm_dialogue(bot, context: commands.Context, title: str, description: str) -> bool:
+async def confirm_dialogue(bot, context: commands.Context, title: str, description: str, timeout: float = 60.0) -> bool:
     id = str(random.randint(0, 100000))
     embed = discord.Embed(title=title, description=description)
     yes_button = discord.ui.Button(label="Yes", style=discord.ButtonStyle.green, custom_id=f"yes_{id}")
@@ -15,7 +15,7 @@ async def confirm_dialogue(bot, context: commands.Context, title: str, descripti
     def check(interaction: discord.Interaction):
         return interaction.user == context.author and interaction.channel.type == discord.ChannelType.private
     try:
-        interaction = await bot.wait_for('interaction', check=check, timeout=60.0)
+        interaction = await bot.wait_for('interaction', check=check, timeout=timeout)
         await interaction.response.defer()
         if interaction.data["custom_id"] == f"yes_{id}":
             return True
@@ -23,5 +23,5 @@ async def confirm_dialogue(bot, context: commands.Context, title: str, descripti
             return False
     except asyncio.TimeoutError:
         # User didn't respond within the timeout period
-        await context.author.send("The tracking menu has timed out. Please try again.")
+        await context.author.send("The menu has timed out. Please try again.")
         return None

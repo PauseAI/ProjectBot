@@ -4,6 +4,7 @@ from config import secrets
 from discord.ext import commands
 import discord
 from discord_tools import confirm_dialogue
+from custom_decorators import admin_only
 
 
 class TrackCog(commands.Cog):
@@ -12,6 +13,7 @@ class TrackCog(commands.Cog):
         self.notion = bot.notion
 
     @commands.command(name="track", description="Track a project")
+    @admin_only()
     async def track(self, context: commands.Context):
         try:
             if not isinstance(context.channel, discord.Thread):
