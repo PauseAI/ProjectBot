@@ -29,8 +29,6 @@ class Task:
 notion = Client(auth=config.notion_integration_token)
 
 # The ID of the database you want to retrieve properties from
-PROJECTS_DATABASE_ID = config.projects_db_id
-TASKS_DATABASE_ID = config.tasks_db_id
 DESCRIPTION = True
 
 def get_project(project) -> Project:
@@ -61,7 +59,7 @@ def format_project(project: Project):
     project_markdown = f"### {project.discord_url}"
     #project_markdown = f"### [{project.name}]({project.public_url})"
 
-    skills = ", ".join('`' + skill + '`' for skill in task.skills)
+    skills = ", ".join('`' + skill + '`' for skill in project.skills)
     project_markdown += f" {skills}"
     project_markdown += "\n"
     if DESCRIPTION and project.description:  # Handle optional description
@@ -88,56 +86,61 @@ def format_task(task: Task):
 def format_tiny_task(task: Task, projects: List[Project]):
     if not task.needs_help or not task.involvement == "Tiny":
         return ""
+    if len(task.projects) == 0:
+        return ""
     project = [p for p in projects if p.id == task.projects[0]][0]
     skills = ", ".join('`' + skill + '`' for skill in task.skills)
     spec_skills = ", ".join('`' + skill + '`' for skill in task.special_skills)
     return f"- {project.discord_url} {task.name} **{skills} {spec_skills}**\n"
 
-markdown_output = """
+def get_markdown():
+    markdown_tiny_tasks = """
+## Biweekly Tiny Tasks Shortlist
+In thread is a list of tiny tasks that most people should be able to contribute to immediately
+"""
+    markdown_output = """
 ## Biweekly Projects Shortlist
 In thread is a shortlist of our most important projects, to help orient newcomers.
 """
 
-markdown_tiny_tasks = """
-## Biweekly Tiny Tasks Shortlist
-In thread is a list of tiny tasks that most people should be able to contribute to immediately
-"""
+    print("Grabbing Projects...")
+    projects_results = notion.databases.query(
+        config.projects_db_id,
+        )
+    projects = [get_project(project_row) for project_row in projects_results["results"]]
 
-print("Grabbing Projects...")
-projects_results = notion.databases.query(
-    PROJECTS_DATABASE_ID,
+    print("Grabbing tasks...")
+    tasks_results = notion.databases.query(
+        config.tasks_db_id
     )
-projects = [get_project(project_row) for project_row in projects_results["results"]]
+    tasks = [get_task(task_row) for task_row in tasks_results["results"]]
 
-print("Grabbing tasks...")
-tasks_results = notion.databases.query(
-    TASKS_DATABASE_ID
-)
-tasks = [get_task(task_row) for task_row in tasks_results["results"]]
+    for task in tasks:
+        markdown_tiny_tasks += format_tiny_task(task, projects)
 
-for task in tasks:
-    markdown_tiny_tasks += format_tiny_task(task, projects)
+    for project in projects:
+        if project.priority < 2: 
+            continue    
+        print(project.name)
+        markdown_output += format_project(project)
 
-for project in projects:
-    if project.priority < 2: 
-        continue    
-    print(project.name)
-    markdown_output += format_project(project)
+        related_tasks = [task for task in tasks if task.id in project.tasks]
+        for task in related_tasks:
+            markdown_output += format_task(task)
+            
+        markdown_output += "\n"
 
-    related_tasks = [task for task in tasks if task.id in project.tasks]
-    for task in related_tasks:
-        markdown_output += format_task(task)
-        
-    markdown_output += "\n"
+    markdown_output += """
+    Legend:
+    🟢: Tiny Task: one off, Minimal involvement
+    🟡: Medium Task: Regular involvement or big one off
+    🔴: Big Task: Multiple hour per week
+    """
+    return markdown_output, markdown_tiny_tasks
 
-markdown_output += """
-Legend:
-🟢: Tiny Task: one off, Minimal involvement
-🟡: Medium Task: Regular involvement or big one off
-🔴: Big Task: Multiple hour per week
-"""
-
-with open("projects_shortlist.md", "w", encoding="utf-8") as f:
-    f.write(markdown_output)
-with open("tiny_tasks_shortlist.md", "w", encoding="utf-8") as f:
-    f.write(markdown_tiny_tasks)
+if __name__ == "__main__":
+    markdown_projects, markdown_tasks = get_markdown()
+    with open("projects_shortlist.md", "w", encoding="utf-8") as f:
+        f.write(markdown_projects)
+    with open("tiny_tasks_shortlist.md", "w", encoding="utf-8") as f:
+        f.write(markdown_tasks)
