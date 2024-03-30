@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from notion_client import Client
 from data_extraction import extract_tasks_from_description
-from config import secrets
+import config
 import argparse
 import asyncio
 
@@ -17,7 +17,7 @@ intents.message_content = True  # Explicitly request permission to read message 
 client = commands.Bot(intents=intents, command_prefix="!")
 
 # Initialize the Notion client with your integration token
-client.notion = Client(auth=secrets["notion_integration_token"])
+client.notion = Client(auth=config.notion_integration_token)
 
 @client.event
 async def on_ready():
@@ -56,14 +56,14 @@ async def main():
     async with client:
         await client.load_extension('cogs.c_track')
         await client.load_extension('cogs.c_test')
-        await client.start(secrets["discord_bot_secret"])
+        await client.start(config.discord_bot_secret)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Discord Bot')
     parser.add_argument('--staging', action='store_true', help='Start the bot in staging mode')
     args = parser.parse_args()
     if args.staging:
-        secrets["projects_db_id"] = secrets["projects_db_id_staging"]
-        secrets["tasks_db_id"] = secrets["tasks_db_id_staging"]
+        config.projects_db_id = config.projects_db_id_staging
+        config.tasks_db_id = config.tasks_db_id_staging
     
     asyncio.run(main())

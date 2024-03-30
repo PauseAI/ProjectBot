@@ -1,12 +1,9 @@
 from openai import OpenAI
 import json
 import jsonschema
-import yaml
+import config
 
-with open('secrets.yml', 'r') as file:
-    secrets = yaml.safe_load(file)
-
-client = OpenAI(api_key = secrets["openai_api_key"], organization="org-DP5OE4ilCc68WugMCjHvlNCN")
+client = OpenAI(api_key = config.openai_api_key, organization=config.openai_organization)
 
 def retries(f):
     """

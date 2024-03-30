@@ -1,6 +1,6 @@
 from utils import properties_from_message, page_content_from_msg, get_task_properties, print_message_info
 from data_extraction import extract_tasks_from_description
-from config import secrets
+import config
 from discord.ext import commands
 import discord
 from discord_tools import confirm_dialogue
@@ -27,7 +27,7 @@ class TrackCog(commands.Cog):
                 page_content = page_content_from_msg(msg)
                 extracted_tasks = extract_tasks_from_description(msg.clean_content)
                 notion_response = self.notion.pages.create(
-                    parent={"database_id": secrets["projects_db_id"]},
+                    parent={"database_id": config.projects_db_id},
                     properties=entry_properties,
                     children=page_content
                 )
@@ -49,7 +49,7 @@ class TrackCog(commands.Cog):
                         create = await confirm_dialogue(self.bot, context, "Create Task?", task_string)
                         if create:
                             self.notion.pages.create(
-                                parent={"database_id": secrets["tasks_db_id"]},
+                                parent={"database_id": config.tasks_db_id},
                                 properties=task_properties
                             )
                             await context.author.send("New task added to the database succesfully")

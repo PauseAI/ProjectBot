@@ -1,7 +1,7 @@
 from notion_client import Client
 from dataclasses import dataclass
 from typing import List
-from config import secrets
+import config
 
 @dataclass
 class Project:
@@ -26,11 +26,11 @@ class Task:
     projects: list[str] = None
 
 # Initialize the Notion client with your integration token
-notion = Client(auth=secrets["notion_integration_token"])
+notion = Client(auth=config.notion_integration_token)
 
 # The ID of the database you want to retrieve properties from
-PROJECTS_DATABASE_ID = secrets["projects_db_id"]
-TASKS_DATABASE_ID = secrets["tasks_db_id"]
+PROJECTS_DATABASE_ID = config.projects_db_id
+TASKS_DATABASE_ID = config.tasks_db_id
 DESCRIPTION = True
 
 def get_project(project) -> Project:
