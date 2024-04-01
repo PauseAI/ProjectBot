@@ -7,7 +7,12 @@ projects_db_id_staging = "16d604fad7364ee5b1d111e33b739310"
 tasks_db_id_staging = "86dc1d61ac814cae8a850be348092758"
 openai_organization = "org-DP5OE4ilCc68WugMCjHvlNCN"
 admin_user_ids = [
-    252771041464680449,
+    252771041464680449, # Maxime F
+    211238287522791425, # Joep
+    228252768056508437, # Nathan
+    732773275238793266, # Felix
+    312360228555456533, # Will Petillo
+    232972493957103618, # Pato
 ]
 
 # ----- SECRETS -------------------
