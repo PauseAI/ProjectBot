@@ -6,6 +6,7 @@ tasks_db_id = "d67272ac6a8c4511bde0fa7db7da86c9"
 projects_db_id_staging = "16d604fad7364ee5b1d111e33b739310"
 tasks_db_id_staging = "86dc1d61ac814cae8a850be348092758"
 openai_organization = "org-DP5OE4ilCc68WugMCjHvlNCN"
+airtable_base_id = 'appWPTGqZmUcs3NWu'
 admin_user_ids = [
     252771041464680449, # Maxime F
     211238287522791425, # Joep
@@ -31,3 +32,6 @@ notion_integration_token = ( os.environ["NOTION_INTEGRATION_TOKEN"]
 openai_api_key = ( os.environ["OPENAI_API_KEY"] 
                       if "OPENAI_API_KEY" in os.environ 
                       else secrets["openai_api_key"] )
+airtable_token = ( os.environ["AIRTABLE_TOKEN"] 
+                      if "AIRTABLE_TOKEN" in os.environ 
+                      else secrets["airtable_token"] )
