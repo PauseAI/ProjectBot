@@ -7,6 +7,9 @@ projects_db_id_staging = "16d604fad7364ee5b1d111e33b739310"
 tasks_db_id_staging = "86dc1d61ac814cae8a850be348092758"
 openai_organization = "org-DP5OE4ilCc68WugMCjHvlNCN"
 airtable_base_id = 'appWPTGqZmUcs3NWu'
+airtable_base_id_staging = 'appFY0WxDonY1Jgb1'
+projects_table_name = "Projects"
+tasks_table_name = "Tasks"
 admin_user_ids = [
     252771041464680449, # Maxime F
     211238287522791425, # Joep
@@ -26,6 +29,9 @@ except FileNotFoundError:
 discord_bot_secret = ( os.environ["DISCORD_BOT_SECRET"] 
                       if "DISCORD_BOT_SECRET" in os.environ 
                       else secrets["discord_bot_secret"] )
+discord_bot_secret_staging = ( os.environ["DISCORD_BOT_SECRET_STAGING"] 
+                      if "DISCORD_BOT_SECRET_STAGING" in os.environ 
+                      else secrets["discord_bot_secret_staging"] )
 notion_integration_token = ( os.environ["NOTION_INTEGRATION_TOKEN"] 
                       if "NOTION_INTEGRATION_TOKEN" in os.environ 
                       else secrets["notion_integration_token"] )

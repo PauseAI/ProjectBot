@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from notion_client import Client
+from airtable import Airtable
 from data_extraction import extract_tasks_from_description
 import config
 import argparse
@@ -16,38 +17,12 @@ intents.message_content = True  # Explicitly request permission to read message 
 #client = discord.Client(intents=intents)
 client = commands.Bot(intents=intents, command_prefix="!")
 
-# Initialize the Notion client with your integration token
-client.notion = Client(auth=config.notion_integration_token)
 
 @client.event
 async def on_ready():
     print(f'We have logged in as {client.user}', flush=True)
 
-"""
-@client.event
-async def on_message(message):
-    try:
-        # Check if the message is from you and contains the !fetch command
-        print("Message received", flush=True)
-        # Non-admin interactions
-        if message.content.startswith('!hello'):
-            await message.channel.send("Hello :)")
 
-        # Admin interactions
-        if message.author.id not in secrets["admin_user_ids"]:
-            return
-        
-        if message.content.startswith('!track'):
-            return #await c_track.track(notion, message)
-        
-        if message.content.startswith('!test'):
-            return #await c_test.test(notion, message)
-
-    except Exception as e:
-        print(f"An Exception occured: {e}", flush=True)
-        await message.channel.send("Ooops! Something went wrong. Try again or contact someone from @software-team.")
-"""
-        
 @client.event
 async def on_interaction(interaction):
     pass
@@ -66,5 +41,12 @@ if __name__ == "__main__":
     if args.staging:
         config.projects_db_id = config.projects_db_id_staging
         config.tasks_db_id = config.tasks_db_id_staging
+        config.airtable_base_id = config.airtable_base_id_staging
+        config.discord_bot_secret = config.discord_bot_secret_staging
     
+    # Initialize the Notion client with your integration token
+    client.notion = Client(auth=config.notion_integration_token)
+    client.projects_table = Airtable(config.airtable_base_id, config.projects_table_name, api_key=config.airtable_token)
+    client.tasks_table = Airtable(config.airtable_base_id, config.tasks_table_name, api_key=config.airtable_token)
+
     asyncio.run(main())

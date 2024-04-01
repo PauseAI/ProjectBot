@@ -1,4 +1,6 @@
-from utils import properties_from_message, page_content_from_msg, get_task_properties, print_message_info
+from utils import ( get_notion_project_properties, page_content_from_msg, 
+                   get_notion_task_properties, print_message_info, 
+                   get_airtable_project_properties, get_airtable_task_properties )
 from data_extraction import extract_tasks_from_description
 import config
 from discord.ext import commands
@@ -23,7 +25,8 @@ class TrackCog(commands.Cog):
                 print_message_info(msg)
                 # Add the entry to the database
                 #thread_url = f"https://discord.com/channels/{msg.guild.id}/{msg.channel.id}"
-                entry_properties = properties_from_message(msg)
+                entry_properties = get_notion_project_properties(msg)
+                airtable_entry = get_airtable_project_properties(msg)
                 page_content = page_content_from_msg(msg)
                 extracted_tasks = extract_tasks_from_description(msg.clean_content)
                 notion_response = self.notion.pages.create(
@@ -31,6 +34,7 @@ class TrackCog(commands.Cog):
                     properties=entry_properties,
                     children=page_content
                 )
+                project_record = self.bot.projects_table.insert(airtable_entry, typecast=True)
                 print("New entry added to the database successfully.", flush=True)
                 # Constructing the response message
                 response_message = (
@@ -43,7 +47,8 @@ class TrackCog(commands.Cog):
                     print("Failure during tasks extraction")
                 else:
                     for extracted_task in extracted_tasks:
-                        task_properties = get_task_properties(extracted_task, notion_response["id"])
+                        task_properties = get_notion_task_properties(extracted_task, notion_response["id"])
+                        task_properties_airtable = get_airtable_task_properties(extracted_task, project_record["id"])
                         skills_string = " ".join(["`"+skill+"`" for skill in extracted_task["skills"]])
                         task_string = f"{extracted_task['involvement']}: {extracted_task['task']} {skills_string}"
                         create = await confirm_dialogue(self.bot, context, "Create Task?", task_string)
@@ -52,6 +57,7 @@ class TrackCog(commands.Cog):
                                 parent={"database_id": config.tasks_db_id},
                                 properties=task_properties
                             )
+                            self.bot.tasks_table.insert(task_properties_airtable, typecast=True)
                             await context.author.send("New task added to the database succesfully")
                 print("Response sent succesfully", flush=True)
         except Exception as e:

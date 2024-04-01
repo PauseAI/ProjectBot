@@ -1,4 +1,4 @@
-def properties_from_message(msg):
+def get_notion_project_properties(msg):
     thread_url = f"https://discord.com/channels/{msg.guild.id}/{msg.channel.id}"
     entry_properties = {
         "Name": {
@@ -24,7 +24,7 @@ def properties_from_message(msg):
     }
     return entry_properties
 
-def get_task_properties(task, project_id):
+def get_notion_task_properties(task, project_id):
     properties = {
         "Name": {
             "title": [
@@ -53,7 +53,25 @@ def get_task_properties(task, project_id):
     }
     return properties
 
+def get_airtable_project_properties(msg):
+    thread_url = f"https://discord.com/channels/{msg.guild.id}/{msg.channel.id}"
+    entry_properties = {
+        "Name": msg.channel.name,
+        "Discord Link": thread_url,
+        "Lead": msg.author.display_name,
+        "Skills": [tag.name for tag in msg.channel.applied_tags],
+        "Description": msg.clean_content,
+    }
+    return entry_properties
 
+def get_airtable_task_properties(task, project_id):
+    properties = {
+        "Name": task["task"],
+        "Skills": task["skills"],
+        "Involvement": task["involvement"],
+        "Projects": [project_id]
+    }
+    return properties
 
 def page_content_from_msg(msg):
     page_content = [
