@@ -7,7 +7,7 @@ class OnboardingCog(commands.Cog):
         self.notion = bot.notion
 
     @commands.command(name="leaderboard", description="Onboarding Leaderboard")
-    @admin_only
+    @admin_only()
     async def onboarding(self, context: commands.Context):
         try:
             users_dict = {}
