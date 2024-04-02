@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 from notion_client import Client
 from airtable import Airtable
-from data_extraction import extract_tasks_from_description
 import config
 import argparse
 import asyncio
@@ -10,6 +9,7 @@ import asyncio
 # Define the intents
 intents = discord.Intents.default()  # defaults to all but the privileged ones
 intents.messages = True  # to read messages
+intents.reactions = True # to read reactions
 intents.guilds = True  # to access guild (server) information
 intents.message_content = True  # Explicitly request permission to read message content
 
@@ -32,6 +32,7 @@ async def main():
         await client.load_extension('cogs.c_track')
         await client.load_extension('cogs.c_test')
         await client.load_extension('cogs.c_list')
+        await client.load_extension('cogs.c_onboarding')
         await client.start(config.discord_bot_secret)
 
 if __name__ == "__main__":

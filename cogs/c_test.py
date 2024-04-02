@@ -17,11 +17,14 @@ class TestCog(commands.Cog):
     @commands.command(name="test", description="Test")
     async def test(self, context: commands.Context):
         await context.send(get_user_info_str(context))
-        create = await confirm_dialogue(self.bot, context, "Create Task?", "This is the task text `write` `research`", "blah")
-        if create:
-            await context.author.send("YEEES")
-        else:
-            await context.author.send("NOOOOAA")
+        
+        emoji_dict = {}
+        async for message in context.channel.history(limit=None):
+            for reaction in message.reactions:
+                if str(reaction.emoji) not in emoji_dict:
+                    emoji_dict[str(reaction.emoji)] = 0
+                emoji_dict[str(reaction.emoji)] += 1
+        await context.send(str(emoji_dict))
 
 async def setup(bot):
     await bot.add_cog(TestCog(bot))
