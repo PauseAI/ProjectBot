@@ -1,8 +1,9 @@
 from discord.ext import commands
+from discord import Client
 from custom_decorators import admin_only
 
 class OnboardingCog(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: Client):
         self.bot = bot
         self.notion = bot.notion
 
@@ -11,8 +12,13 @@ class OnboardingCog(commands.Cog):
     async def onboarding(self, context: commands.Context):
         try:
             users_dict = {}
-            messages = [msg async for msg in context.channel.history(limit=1000)]
+            channel = self.bot.get_channel("1174807044990193775")
+            messages = [msg async for msg in channel.history(limit=1000)]
+            i = 0
             for message in messages:
+                if i%50 == 0:
+                    await context.author.send(f"Processed {i} messages")
+                i+=1
                 if message.type.name != "new_member" or len(message.reactions) != 1:
                     continue
                 reaction = message.reactions[0]
@@ -45,7 +51,7 @@ class OnboardingCog(commands.Cog):
                     continue
                 medal = medal_emojis[i] if i < len(medal_emojis) else "🏅"
                 rankings += f"{medal} {emoji}: {user} - {count} times\n"
-            await context.send(rankings)
+            await channel.send(rankings)
             
         except Exception as e:
             print(e)
