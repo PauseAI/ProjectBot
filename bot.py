@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
-from notion_client import Client
-from airtable import Airtable
+from airtable_client import TABLES
 import config
 import argparse
 import asyncio
@@ -40,14 +39,8 @@ if __name__ == "__main__":
     parser.add_argument('--staging', action='store_true', help='Start the bot in staging mode')
     args = parser.parse_args()
     if args.staging:
-        config.projects_db_id = config.projects_db_id_staging
-        config.tasks_db_id = config.tasks_db_id_staging
         config.airtable_base_id = config.airtable_base_id_staging
         config.discord_bot_secret = config.discord_bot_secret_staging
+        TABLES.set_staging()
     
-    # Initialize the Notion client with your integration token
-    client.notion = Client(auth=config.notion_integration_token)
-    client.projects_table = Airtable(config.airtable_base_id, config.projects_table_name, api_key=config.airtable_token)
-    client.tasks_table = Airtable(config.airtable_base_id, config.tasks_table_name, api_key=config.airtable_token)
-
     asyncio.run(main())

@@ -12,7 +12,6 @@ def get_user_info_str(context: commands.Context) -> str:
 class TestCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.notion = bot.notion
 
     @commands.command(name="test", description="Test")
     async def test(self, context: commands.Context):

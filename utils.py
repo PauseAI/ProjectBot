@@ -1,58 +1,3 @@
-def get_notion_project_properties(msg):
-    thread_url = f"https://discord.com/channels/{msg.guild.id}/{msg.channel.id}"
-    entry_properties = {
-        "Name": {
-            "title": [
-                {
-                    "text": {
-                        "content": msg.channel.name
-                    }
-                }
-            ]
-        },
-        "Discord Link": {
-            "url": thread_url
-        },  
-        "Lead": {
-            "select": {
-                "name": msg.author.display_name
-            }
-        },
-        "Skills": {
-            "multi_select": [{"name": tag.name} for tag in msg.channel.applied_tags]
-        }
-    }
-    return entry_properties
-
-def get_notion_task_properties(task, project_id):
-    properties = {
-        "Name": {
-            "title": [
-                {
-                    "text": {
-                        "content": task["task"]
-                    }
-                }
-            ]
-        },
-        "Skills": {
-            "multi_select": [{"name": skill} for skill in task["skills"]]
-        },
-        "Involvement": {
-            "select": {
-                "name": task["involvement"]
-            }
-        },
-        "Projects": {
-            "relation": [
-                {
-                    "id": project_id
-                }
-            ]
-        }
-    }
-    return properties
-
 def get_airtable_project_properties(msg):
     thread_url = f"https://discord.com/channels/{msg.guild.id}/{msg.channel.id}"
     entry_properties = {
@@ -72,26 +17,6 @@ def get_airtable_task_properties(task, project_id):
         "Projects": [project_id]
     }
     return properties
-
-def page_content_from_msg(msg):
-    page_content = [
-        {
-            "object": "block",
-            "type": "paragraph",
-            "paragraph": {
-                "rich_text": [
-                    {
-                        "type": "text",
-                        "text": {
-                            "content": msg.clean_content,
-                        },
-                    },
-                ],
-            },
-        },
-        # You can add more blocks here as needed
-    ]
-    return page_content
 
 def print_message_info(msg):
     print("Message info: ", flush=True)

@@ -1,14 +1,12 @@
-from notion_client import Client
+from airtable_client import TABLES
 from dataclasses import dataclass
 from typing import List
-import config
 
 @dataclass
 class Project:
     id: str
     name: str
     discord_url: str
-    public_url: str
     description: str = None # Optional property
     skills: list[str] = None
     priority: int = 0
@@ -25,34 +23,32 @@ class Task:
     special_skills: list[str] = None
     projects: list[str] = None
 
-# Initialize the Notion client with your integration token
-notion = Client(auth=config.notion_integration_token)
-
 # The ID of the database you want to retrieve properties from
 DESCRIPTION = True
 
-def get_project(project) -> Project:
+def get_project(record) -> Project:
+    fields = record["fields"]
     return Project(
-        id = project["id"],
-        name=project['properties']['Name']['title'][0]['plain_text'],
-        discord_url=project['properties']['Discord Link']['url'],
-        public_url=project['public_url'],
-        description=project['properties']['Short Description']['rich_text'][0]['plain_text'] if project['properties']['Short Description']['rich_text'] else "",
-        skills=[skill["name"] for skill in project["properties"]["Skills"]["multi_select"]],
-        priority={"": -1, "🔥": 0, "🔥🔥": 1, "🔥🔥🔥": 2}[project["properties"]["Priority"]["multi_select"][0]["name"] if project["properties"]["Priority"]["multi_select"] else ""],
-        needs_leadership=project["properties"]["Needs Leadership"]["checkbox"],
-        tasks=[rel["id"] for rel in project["properties"]["Tasks"]["relation"]]
+        id = record["id"],
+        name=fields['Name'],
+        discord_url=fields.get('Discord Link', ""),
+        description=fields.get('Short Description',""),
+        skills=fields.get("Skills", []),
+        priority={"": -1, "🔥": 0, "🔥🔥": 1, "🔥🔥🔥": 2}.get(fields.get("Priority",""), -1),
+        needs_leadership=fields.get("Needs Leadership", False),
+        tasks=fields.get("Tasks",[])
     )
 
-def get_task(task) -> Task:
+def get_task(record) -> Task:
+    fields = record["fields"]
     return Task(
-        id = task["id"],
-        name=task['properties']['Name']['title'][0]['plain_text'],
-        involvement=task["properties"]["Involvement"]["select"]["name"] if task["properties"]["Involvement"]["select"] else "",
-        needs_help = task["properties"]["Needs Help"]["checkbox"],
-        skills=[skill["name"] for skill in task["properties"]["Skills"]["multi_select"]],
-        special_skills=[skill["name"] for skill in task["properties"]["Specialised Skills"]["multi_select"]],
-        projects=[rel["id"] for rel in task["properties"]["Projects"]["relation"]],
+        id = record["id"],
+        name=fields['Name'],
+        involvement=fields.get("Involvement", ""),
+        needs_help = fields.get("Needs Help", False),
+        skills=fields.get("Skills",[]),
+        special_skills=fields.get("Specialised Skills", []),
+        projects=fields.get("Projects", []),
         )
 
 def format_project(project: Project):
@@ -104,16 +100,12 @@ In thread is a shortlist of our most important projects, to help orient newcomer
 """
 
     print("Grabbing Projects...")
-    projects_results = notion.databases.query(
-        config.projects_db_id,
-        )
-    projects = [get_project(project_row) for project_row in projects_results["results"]]
+    projects_results = TABLES.projects.get_all()
+    projects = [get_project(record) for record in projects_results]
 
     print("Grabbing tasks...")
-    tasks_results = notion.databases.query(
-        config.tasks_db_id
-    )
-    tasks = [get_task(task_row) for task_row in tasks_results["results"]]
+    tasks_results = TABLES.tasks.get_all()
+    tasks = [get_task(record) for record in tasks_results]
 
     for task in tasks:
         markdown_tiny_tasks += format_tiny_task(task, projects)

@@ -5,7 +5,6 @@ from custom_decorators import admin_only
 class OnboardingCog(commands.Cog):
     def __init__(self, bot: Client):
         self.bot = bot
-        self.notion = bot.notion
 
     @commands.command(name="leaderboard", description="Onboarding Leaderboard")
     @admin_only()
