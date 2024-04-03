@@ -12,7 +12,7 @@ class OnboardingCog(commands.Cog):
     async def onboarding(self, context: commands.Context):
         try:
             users_dict = {}
-            channel = self.bot.get_channel("1174807044990193775")
+            channel = self.bot.get_channel(1174807044990193775)
             messages = [msg async for msg in channel.history(limit=1000)]
             i = 0
             for message in messages:
