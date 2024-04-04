@@ -41,6 +41,9 @@ class TrackCog(commands.Cog):
             except:
                 await context.author.send("Unable to retrieve this channel")
                 return
+            if not channel:
+                await context.author.send("Unable to retrieve this channel")
+                return
             async for msg in channel.history(oldest_first=True, limit=1):
                 new_data = get_airtable_project_properties(msg)
                 for field in ["Name", "Description", "Lead", "Skills"]:
