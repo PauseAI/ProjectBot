@@ -10,6 +10,9 @@ airtable_base_id = 'appWPTGqZmUcs3NWu'
 airtable_base_id_staging = 'appFY0WxDonY1Jgb1'
 projects_table_name = "Projects"
 tasks_table_name = "Tasks"
+onboarding_events_table_name = "Onboarding Events"
+onboarding_channel_id = 1174807044990193775
+onboarding_channel_id_staging = 1214198954321907845
 admin_user_ids = [
     252771041464680449, # Maxime F
     211238287522791425, # Joep

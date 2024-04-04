@@ -23,6 +23,23 @@ async def on_ready():
 @client.event
 async def on_interaction(interaction):
     pass
+"""
+@client.event
+async def on_raw_reaction_add(payload):
+    print("test2", flush=True)
+    channel = await client.fetch_channel(payload.channel_id)
+    message = await channel.fetch_message(payload.message_id)
+    user = await client.fetch_user(payload.user_id)
+    emoji = payload.emoji
+
+    await channel.send("Hello")
+"""
+"""
+@client.event
+async def on_reaction_add(reaction, user):
+    print("test", flush=True)
+    await user.send("test")
+"""
 
 async def main():
     async with client:
@@ -39,6 +56,7 @@ if __name__ == "__main__":
     if args.staging:
         config.airtable_base_id = config.airtable_base_id_staging
         config.discord_bot_secret = config.discord_bot_secret_staging
+        config.onboarding_channel_id = config.onboarding_channel_id_staging
         TABLES.set_staging()
     
     asyncio.run(main())
