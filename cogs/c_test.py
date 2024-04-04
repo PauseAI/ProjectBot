@@ -1,6 +1,5 @@
 from discord.ext import commands
-from typing import Tuple
-from discord_tools import confirm_dialogue
+import discord
 
 def get_user_info_str(context: commands.Context) -> str:
     usr = context.author
@@ -10,12 +9,13 @@ def get_user_info_str(context: commands.Context) -> str:
              f"ID: {usr.id}" )
 
 class TestCog(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: discord.Client):
         self.bot = bot
 
     @commands.command(name="test", description="Test")
-    async def test(self, context: commands.Context):
+    async def test(self, context: commands.Context, test_arg="blah"):
         await context.send(get_user_info_str(context))
+        await context.send(test_arg)
         
         emoji_dict = {}
         async for message in context.channel.history(limit=None):

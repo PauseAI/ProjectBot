@@ -1,4 +1,4 @@
-from utils import ( print_message_info, 
+from utils import ( print_message_info, extract_channel_id,
                    get_airtable_project_properties, get_airtable_task_properties )
 from data_extraction import extract_tasks_from_description
 import config
@@ -12,6 +12,49 @@ from airtable_client import TABLES
 class TrackCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command(name="update", description="Update project")
+    async def update(self, context: commands.Context, discord_url=None):
+        try:
+            print("Update command", flush=True)
+            if not discord_url:
+                await context.author.send("You need to pass the link to the project thread in the command (!test <link>)")
+                return
+            channel_id = extract_channel_id(discord_url)
+            if not channel_id:
+                await context.author.send("This channel url is not well formed")
+                return
+            # We were able to extract a channel id from this url
+            records = TABLES.projects.get_all()
+            matching = [r for r in records if r["fields"].get("Discord Link", "") == discord_url]
+            if not matching:
+                await context.author.send("This project is not in the database. Use !track instead")
+                return
+            if len(matching) > 1:
+                await context.author.send("This project is duplicated in the database. Please investigate.")
+                return
+            # Now we have exactly one match
+            project_id = matching[0]["id"]
+            old_data = matching[0]["fields"]
+            try:
+                channel = self.bot.get_channel(channel_id)
+            except:
+                await context.author.send("Unable to retrieve this channel")
+                return
+            async for msg in channel.history(oldest_first=True, limit=1):
+                new_data = get_airtable_project_properties(msg)
+                for field in ["Name", "Description", "Lead", "Skills"]:
+                    if str(new_data[field]).strip() != str(old_data[field]).strip():
+                        if await confirm_dialogue(self.bot, context, f"Update {field}?", 
+                            f"Old: {old_data[field][:300]}\n New: {new_data[field][:300]}"
+                            ):
+                            TABLES.projects.update(project_id, {field: new_data[field]}, typecast=True)
+                            await context.author.send("Done")
+                await context.author.send("Update finished")
+
+        except Exception as e:
+            await context.author.send("Something unexpected happened, please contact an administrator.")
+            print(e, flush=True)
 
     @commands.command(name="track", description="Track a project")
     @admin_only()
