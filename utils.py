@@ -4,6 +4,7 @@ def get_airtable_project_properties(msg):
         "Name": msg.channel.name,
         "Discord Link": thread_url,
         "Lead": msg.author.display_name,
+        "Lead Id": msg.author.id,
         "Skills": [tag.name for tag in msg.channel.applied_tags],
         "Description": msg.clean_content,
     }

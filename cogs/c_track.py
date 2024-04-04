@@ -10,7 +10,7 @@ from airtable_client import TABLES
 
 
 class TrackCog(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: discord.Client):
         self.bot = bot
 
     @commands.command(name="update", description="Update project")
@@ -35,7 +35,8 @@ class TrackCog(commands.Cog):
                 return
             # Now we have exactly one match
             project_id = matching[0]["id"]
-            old_data = matching[0]["fields"]
+            schema =  ["Name", "Description", "Lead", "Lead Id", "Skills"]
+            old_data = {k:matching[0]["fields"].get(k, "") for k in schema}
             try:
                 channel = self.bot.get_channel(channel_id)
             except:
@@ -46,10 +47,10 @@ class TrackCog(commands.Cog):
                 return
             async for msg in channel.history(oldest_first=True, limit=1):
                 new_data = get_airtable_project_properties(msg)
-                for field in ["Name", "Description", "Lead", "Skills"]:
+                for field in schema:
                     if str(new_data[field]).strip() != str(old_data[field]).strip():
                         if await confirm_dialogue(self.bot, context, f"Update {field}?", 
-                            f"Old: {old_data[field][:300]}\n New: {new_data[field][:300]}"
+                            f"Old: {str(old_data[field])[:300]}\n New: {str(new_data[field])[:300]}"
                             ):
                             TABLES.projects.update(project_id, {field: new_data[field]}, typecast=True)
                             await context.author.send("Done")
