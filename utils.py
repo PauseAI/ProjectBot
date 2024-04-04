@@ -5,7 +5,8 @@ def get_airtable_project_properties(msg):
         "Discord Link": thread_url,
         "Lead": msg.author.display_name,
         "Lead Id": msg.author.id,
-        "Skills": [tag.name for tag in msg.channel.applied_tags],
+        "Skills": [tag.name for tag in msg.channel.applied_tags 
+                   if tag.name not in ["High Priority", "Top Priority"]],
         "Description": msg.clean_content,
     }
     return entry_properties
