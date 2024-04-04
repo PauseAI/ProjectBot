@@ -5,7 +5,6 @@ import config
 import argparse
 import asyncio
 
-# Define the intents
 intents = discord.Intents.default()  # defaults to all but the privileged ones
 intents.messages = True  # to read messages
 intents.reactions = True # to read reactions
@@ -13,7 +12,6 @@ intents.guilds = True  # to access guild (server) information
 intents.message_content = True  # Explicitly request permission to read message content
 
 # Initialize the Discord client
-#client = discord.Client(intents=intents)
 client = commands.Bot(intents=intents, command_prefix="!")
 
 

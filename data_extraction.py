@@ -45,7 +45,6 @@ def extract_tasks_from_description(project_description):
         }
     }
 
-    # Construct your prompt carefully! Here's a basic example:
     prompt = """You are a project assistant. You will be provided with a project description.
     Please provide a JSON response containing a list of elements representing each task in the project.
     Each list element is contains the following keys:
@@ -96,25 +95,3 @@ def extract_tasks_from_description(project_description):
     except (json.JSONDecodeError, jsonschema.ValidationError) as e:
         print(f"Error decoding JSON: {e}")
         return None  # Indicate failure
-
-test_desc = """
-There are many excellent resources across the Discord server, but Discord is optimized for ongoing conversation and useful knowledge and created materials are often lost. The official drive was sometimes hard to find, and several volunteers have their own collection of documents, notes, tips, strategies, lessons learned, etc. Many of these would be useful to other members.
-
-Project specs for a central repo of knowledge and materials:
-The folder structure should be maximally useful
-Edit access is given on a per-folder or per-file basis as needed
-It will be updated on a regular basis with new materials from across the Discord
-Writers can be recruited to draft or edit documents directly in the centralized shared drive
-The question "Where is [piece of info with ongoing usefulness]?" and "Where should this be stored for future reference?" should be easily answered with a drive link
-
-I have been given access to manage this project on an ongoing basis. I have experience in shared file management and organization, I'm open to feedback, and I have a tendency to keep my eyes peeled for information that would be useful to others.
-
-How You Can Help:
-Tiny: Share existing files from your own collection that are relevant to PauseAI and that you think would be useful for other people to have (a copy can be added to the drive)
-Tiny: Tag me when material shows up in the Discord stream that you believe should be added to the permanent knowledge base
-Tiny: Give feedback about the Google Drive
-Medium: Write definitive informational documents about various volunteer actions
-"""
-if __name__ == "__main__":
-    result = extract_tasks_from_description(test_desc)
-    print(result)
