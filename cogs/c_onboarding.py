@@ -121,7 +121,7 @@ class OnboardingCog(commands.Cog):
             if not matching_user_id:
                 await context.author.send("Unable to find a newcomer with this id")
                 return
-            matching = [r for r in records 
+            matching = [r for r in matching_user_id 
                         if r["fields"].get("Onboarder Id", "") == str(context.author.id)]
             if not matching:
                 await context.author.send("You are not the onboarder for this newcomer")
