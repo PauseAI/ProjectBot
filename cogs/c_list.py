@@ -1,7 +1,7 @@
 from discord.ext import commands
-from discord_tools import confirm_dialogue
 from custom_decorators import admin_only
-from shortlist import get_markdown
+from shortlist import (LEGEND, format_project, format_task_oneline, 
+                       get_all_projects, get_all_tasks)
 
 class ListCog(commands.Cog):
     def __init__(self, bot):
@@ -11,8 +11,11 @@ class ListCog(commands.Cog):
     @admin_only()
     async def list_projects(self, context: commands.Context):
         try:
-            markdown_projects, _ = get_markdown()
-            await context.send(markdown_projects)
+            projects = [p for p in get_all_projects() if p.priority==2]
+            tasks = get_all_tasks()
+            for project in projects:
+                await context.send(format_project(project, tasks, show_description=True))
+            await context.send(LEGEND)
         except Exception as e:
             print(e, flush=True)
     
@@ -20,8 +23,13 @@ class ListCog(commands.Cog):
     @admin_only()
     async def list_tasks(self, context: commands.Context):
         try:
-            _, markdown_tasks = get_markdown()
-            await context.send(markdown_tasks)
+            projects = get_all_projects()
+            tasks = [t for t in get_all_tasks() if t.involvement=="Tiny" and t.needs_help]
+            for i in range(len(tasks)//5):
+                text = ""
+                for task in tasks[i*5:(i+1)*5]:
+                    text += format_task_oneline(task, projects)
+                await context.send(text)
         except Exception as e:
             print(e, flush=True)
 

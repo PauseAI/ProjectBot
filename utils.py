@@ -1,24 +1,4 @@
-def get_airtable_project_properties(msg):
-    thread_url = f"https://discord.com/channels/{msg.guild.id}/{msg.channel.id}"
-    entry_properties = {
-        "Name": msg.channel.name,
-        "Discord Link": thread_url,
-        "Lead": msg.author.display_name,
-        "Lead Id": msg.author.id,
-        "Skills": [tag.name for tag in msg.channel.applied_tags 
-                   if tag.name not in ["High Priority", "Top Priority"]],
-        "Description": msg.clean_content,
-    }
-    return entry_properties
 
-def get_airtable_task_properties(task, project_id):
-    properties = {
-        "Name": task["task"],
-        "Skills": task["skills"],
-        "Involvement": task["involvement"],
-        "Projects": [project_id]
-    }
-    return properties
 
 def print_message_info(msg):
     print("Message info: ", flush=True)

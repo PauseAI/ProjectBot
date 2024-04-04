@@ -2,6 +2,8 @@ from openai import OpenAI
 import json
 import jsonschema
 import config
+from data_model import Task
+from typing import List
 
 client = OpenAI(api_key = config.openai_api_key, organization=config.openai_organization)
 
@@ -18,7 +20,7 @@ def retries(f):
     return inner
 
 @retries
-def extract_tasks_from_description(project_description):
+def extract_tasks_from_description(project_description) -> List[Task]:
     """Sends a prompt to ChatGPT to extract list of tasks from the 
        project description.
 
@@ -91,7 +93,14 @@ def extract_tasks_from_description(project_description):
     try:
         extracted_data = json.loads(extracted_data_json)  # Load as JSON
         jsonschema.validate(instance=extracted_data, schema=expected_schema)
-        return extracted_data  # Return a Python dictionary
+        return [
+            Task(
+                name=d["task"],
+                involvement=d["involvement"],
+                skills=d["skills"],
+                special_skills=[],
+                ) for d in extracted_data
+                ]
     except (json.JSONDecodeError, jsonschema.ValidationError) as e:
         print(f"Error decoding JSON: {e}")
-        return None  # Indicate failure
+        return None
