@@ -21,7 +21,7 @@ class OnboardingCog(commands.Cog):
                 return
             TABLES.onboarding_events.insert({
                 "Newcomer Id": member.id,
-                "Newcomer Name": member.name,
+                "Newcomer Name": member.display_name,
                 "Datetime Joined": member.created_at.isoformat()
             }, typecast=True)
         except Exception as e:
@@ -155,23 +155,21 @@ class OnboardingCog(commands.Cog):
     @admin_only()
     async def leaderboard(self, context: commands.Context):
         try:
+            records = TABLES.onboarding_events.get_all()
+
             users_dict = {}
-            channel = self.bot.get_channel(config.onboarding_channel_id)
-            messages = [msg async for msg in channel.history(limit=1000)]
-            i = 0
-            for message in messages:
-                if i%50 == 0:
-                    await context.author.send(f"Processed {i} messages")
-                i+=1
-                if message.type.name != "new_member" or len(message.reactions) != 1:
+            for record in records:
+                emoji = record["fields"].get("Emoji", "")
+                if emoji in {"⛔", "🔁"}:
                     continue
-                reaction = message.reactions[0]
-                async for user in reaction.users():
-                    if user.display_name not in users_dict:
-                        users_dict[user.display_name] = {}
-                    if str(reaction.emoji) not in users_dict[user.display_name]:
-                        users_dict[user.display_name][str(reaction.emoji)] = 0
-                    users_dict[user.display_name][str(reaction.emoji)] += 1
+                onboarder_id = record["fields"].get("Onboarder Id", "")
+                if not onboarder_id:
+                    continue
+                if onboarder_id not in users_dict:
+                    users_dict[onboarder_id] = {}
+                if emoji not in users_dict[onboarder_id]:
+                    users_dict[onboarder_id][emoji] = 0
+                users_dict[onboarder_id][emoji] += 1
             
             # Create the emoji rankings
             emoji_dict = {}
@@ -190,15 +188,18 @@ class OnboardingCog(commands.Cog):
             # Send the emoji rankings
             rankings = "Emoji Rankings:\n"
             medal_emojis = ["🥇", "🥈", "🥉"]
-            for i, (emoji, (user, count)) in enumerate(sorted_rankings):
+            for i, (emoji, (user_id, count)) in enumerate(sorted_rankings):
                 if count <= 2:
                     continue
+                user = self.bot.get_user(int(user_id))
+                if not user:
+                    continue
                 medal = medal_emojis[i] if i < len(medal_emojis) else "🏅"
-                rankings += f"{medal} {emoji}: {user} - {count} times\n"
-            await channel.send(rankings)
+                rankings += f"{medal}  -  {emoji}{user.display_name}{emoji}  -  {count} onboardings\n"
+            await context.send(rankings)
             
         except Exception as e:
-            print(e)
+            print(e, flush=True)
 
 async def setup(bot):
     await bot.add_cog(OnboardingCog(bot))
