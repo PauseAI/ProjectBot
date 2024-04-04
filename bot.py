@@ -47,6 +47,7 @@ async def main():
         await client.load_extension('cogs.c_test')
         await client.load_extension('cogs.c_list')
         await client.load_extension('cogs.c_onboarding')
+        # await client.load_extension('cogs.c_special')
         await client.start(config.discord_bot_secret)
 
 if __name__ == "__main__":
