@@ -61,6 +61,7 @@ class OnboardingCog(commands.Cog):
             else:
                 # This user is not in our database
                 TABLES.onboarding_events.insert({
+                    "Datetime Joined": message.created_at.isoformat(),
                     "Newcomer Name": message.author.display_name,
                     "Newcomer Id": str(message.author.id),
                     "Message Id": str(payload.message_id),
