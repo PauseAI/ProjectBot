@@ -12,7 +12,6 @@ class OnboardingCog(commands.Cog):
     
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
-        print("NEWCOMER!", flush=True)
         try:
             records = TABLES.onboarding_events.get_all()
             matching = [r for r in records if r["fields"].get("Newcomer Id", "") == str(member.id)]
@@ -20,7 +19,7 @@ class OnboardingCog(commands.Cog):
                 # This user has already joined in the past. We don't create a new entry
                 return
             TABLES.onboarding_events.insert({
-                "Newcomer Id": member.id,
+                "Newcomer Id": str(member.id),
                 "Newcomer Name": member.display_name,
                 "Datetime Joined": member.created_at.isoformat()
             }, typecast=True)
