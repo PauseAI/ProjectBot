@@ -18,10 +18,13 @@ class OnboardingCog(commands.Cog):
             if matching:
                 # This user has already joined in the past. We don't create a new entry
                 return
+            joined_at = dt.date.today().isoformat()
+            if member.joined_at:
+                joined_at = member.joined_at.isoformat()
             TABLES.onboarding_events.insert({
                 "Newcomer Id": str(member.id),
                 "Newcomer Name": member.display_name,
-                "Datetime Joined": member.created_at.isoformat()
+                "Datetime Joined": joined_at,
             }, typecast=True)
         except Exception as e:
             print(e, flush=True)
