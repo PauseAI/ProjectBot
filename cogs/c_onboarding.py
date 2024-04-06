@@ -5,6 +5,7 @@ from custom_decorators import admin_only
 import config
 from airtable_client import TABLES
 import datetime as dt
+from messages.m_onboarding import INITIAL, MET, REPLIED, CANCEL
 
 class OnboardingCog(commands.Cog):
     def __init__(self, bot: Client):
@@ -72,11 +73,12 @@ class OnboardingCog(commands.Cog):
                     "Datetime Onboarded": dt.datetime.now().isoformat(),
                     "Emoji": str(emoji)
                 }, typecast=True)
-            await user.send((
-                f"Thank you so much for Onboarding {message.author.display_name}!\n" +
-                f"Let me know how it goes! If they reply to your initial message, please send me the following:\n"
-                f"!onboarding replied {message.author.id}"
-                ))
+            await user.send(INITIAL.format(
+                name = message.author.display_name,
+                user_id = message.author.id
+                )
+            )
+                
         except Exception as e:
             print(e, flush=True)
 
@@ -107,9 +109,7 @@ class OnboardingCog(commands.Cog):
                         "Emoji": ""
                     }
                 )
-                await user.send(
-                    f"You are no longer onboarding {message.author.display_name}. If that was a mistake, you can add your reaction again."
-                )
+                await user.send(CANCEL.format(name=message.author.display_name))
 
         except Exception as e:
             print(e, flush=True)
@@ -138,18 +138,10 @@ class OnboardingCog(commands.Cog):
             
             if stage=="replied":
                 TABLES.onboarding_events.update(record_id, {"Initial Reply": True})
-                await context.author.send(
-                    f"Thank you so much for letting me know that {fields['Newcomer Name']} has " +
-                    f"replied to you! If you are able to have a face to face conversation with them, " +
-                    f"please send me the following message: \n"+
-                    f"!onboarding met {user_id}"
-                    )
+                await context.author.send(REPLIED.format(name=fields["Newcomer Name"], user_id=user_id))
             elif stage=="met":
                 TABLES.onboarding_events.update(record_id, {"Face Meeting": True})
-                await context.author.send(
-                    f"Thank you so much for letting me know that you have now met {fields['Newcomer Name']}! " +
-                    f"You Rock!"
-                    )
+                await context.author.send(MET.format(name=fields["Newcomer Name"]))
                 
         except Exception as e:
             print(e, flush=True)
