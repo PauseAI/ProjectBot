@@ -21,7 +21,6 @@ WEBSITE = """🌞Thank you so much for onboarding {name}🌞!
 At this stage your goal is to get {name} to join our discord community - this is where the magic happens!
 Please contact them via email. If you need inspiration, you can find templates [here](https://docs.google.com/document/d/1Psbr38f7BxhRREndRYo_tn_d6Ta0UE_PoXX8wXqnhjQ/edit)
 ## About Them
-Here is the information they have given us. Use it wisely.
 **Name:** {name}
 **Country:** {country}
 **City:** {city}
