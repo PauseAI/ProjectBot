@@ -16,6 +16,24 @@ Once they have replied to you, please notify me by sending me the following comm
 ```
 """
 
+WEBSITE = """🌞Thank you so much for onboarding {name}🌞!
+## Onboarding Guide - Website
+At this stage your goal is to get {name} to join our discord community - this is where the magic happens!
+Please contact them via email. If you need inspiration, you can find templates [here](https://docs.google.com/document/d/1Psbr38f7BxhRREndRYo_tn_d6Ta0UE_PoXX8wXqnhjQ/edit)
+## About Them
+Here is the information they have given us. Use it wisely.
+**Name:** {name}
+**Country:** {country}
+**City:** {city}
+**How do you want to help?**
+{how_to_help}
+**What types of action are you interested in?**
+{types_of_action}
+**Hours per week:** {hours_per_week}
+**Email Address:** ```{email}```
+Good Luck!
+"""
+
 REPLIED = """🌞Amazing! {name} replied to you!🌞
 ## Onboarding Guide
 At this stage your goals are to get {name} to:

@@ -5,7 +5,8 @@ from custom_decorators import admin_only
 import config
 from airtable_client import TABLES
 import datetime as dt
-from messages.m_onboarding import INITIAL, MET, REPLIED, CANCEL
+from messages.m_onboarding import INITIAL, MET, REPLIED, CANCEL, WEBSITE
+import re
 
 class OnboardingCog(commands.Cog):
     def __init__(self, bot: Client):
@@ -30,6 +31,65 @@ class OnboardingCog(commands.Cog):
         except Exception as e:
             print(e, flush=True)
 
+    async def onboard_discord(self, channel: discord.Thread, message: discord.Message, 
+                        user: discord.User, emoji: discord.PartialEmoji):
+        records = TABLES.onboarding_events.get_all()
+        matching = [r for r in records if r["fields"]["Newcomer Id"] == str(message.author.id)]
+        if matching:
+            # This user is already in our database
+            # TODO: Currently there is a timezone bug that I don't know how to fix
+            TABLES.onboarding_events.update(
+                matching[0]["id"],
+                {
+                    "Datetime Joined": message.created_at.isoformat(),
+                    "Message Id": str(message.id),
+                    "Onboarder Name": user.display_name,
+                    "Onboarder Id": str(user.id),
+                    "Datetime Onboarded": dt.datetime.now().isoformat(),
+                    "Emoji": str(emoji)
+                }
+            )
+        else:
+            # This user is not in our database
+            TABLES.onboarding_events.insert({
+                "Datetime Joined": message.created_at.isoformat(),
+                "Newcomer Name": message.author.display_name,
+                "Newcomer Id": str(message.author.id),
+                "Message Id": str(message.id),
+                "Onboarder Name": user.display_name,
+                "Onboarder Id": str(user.id),
+                "Datetime Onboarded": dt.datetime.now().isoformat(),
+                "Emoji": str(emoji)
+            }, typecast=True)
+        await user.send(INITIAL.format(
+            name = message.author.display_name,
+            user_id = message.author.id
+            )
+        )
+
+    async def onboard_website(self, channel: discord.Thread, message: discord.Message, 
+                        user: discord.User):
+        matches = re.findall(r"\|\|([a-zA-Z0-9]+)\|\|", message.clean_content)
+        if len(matches) != 1:
+            return
+        record_id = matches[0]
+        record = TABLES.join_pause_ai.get(record_id)
+        joined_discord = record["fields"].get("Joined Discord", "No")
+        name = record["fields"].get("Name", "Anonymous")
+        if joined_discord == "Yes":
+            await user.send(f"{name} has indicated that they are already on Discord.")
+            return
+
+        await user.send(WEBSITE.format(
+            name=name,
+            email=record["fields"].get("Email address", ""),
+            country=record["fields"].get("Country", ""),
+            city=record["fields"].get("City", ""),
+            how_to_help=record["fields"].get("How do you want to help?", ""),
+            hours_per_week=record["fields"].get("How many hours per week could you spend volunteering with PauseAI?", ""),
+            types_of_action=record["fields"].get("What types of action(s) would you be interested in?", "")
+        ))
+
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         try:
@@ -37,47 +97,19 @@ class OnboardingCog(commands.Cog):
             if channel.id != config.onboarding_channel_id:
                 return
             message = await channel.fetch_message(payload.message_id)
-            if message.type != discord.MessageType.new_member:
+            if message.type != discord.MessageType.new_member and not message.content.startswith("🆕:"):
                 return
-            # A reaction has been added on a new member message
+            # A reaction has been added on a new member message (from discord or website)
             user = await self.bot.fetch_user(payload.user_id)
             emoji = payload.emoji
             if str(emoji) in {"⛔", "🔁"}:
                 # Reserved emojis
                 return
-            records = TABLES.onboarding_events.get_all()
-            matching = [r for r in records if r["fields"]["Newcomer Id"] == str(message.author.id)]
-            if matching:
-                # This user is already in our database
-                # TODO: Currently there is a timezone bug that I don't know how to fix
-                TABLES.onboarding_events.update(
-                    matching[0]["id"],
-                    {
-                        "Datetime Joined": message.created_at.isoformat(),
-                        "Message Id": str(payload.message_id),
-                        "Onboarder Name": user.display_name,
-                        "Onboarder Id": str(user.id),
-                        "Datetime Onboarded": dt.datetime.now().isoformat(),
-                        "Emoji": str(emoji)
-                    }
-                )
+            if message.type == discord.MessageType.new_member:
+                await self.onboard_discord(channel, message, user, emoji)
             else:
-                # This user is not in our database
-                TABLES.onboarding_events.insert({
-                    "Datetime Joined": message.created_at.isoformat(),
-                    "Newcomer Name": message.author.display_name,
-                    "Newcomer Id": str(message.author.id),
-                    "Message Id": str(payload.message_id),
-                    "Onboarder Name": user.display_name,
-                    "Onboarder Id": str(user.id),
-                    "Datetime Onboarded": dt.datetime.now().isoformat(),
-                    "Emoji": str(emoji)
-                }, typecast=True)
-            await user.send(INITIAL.format(
-                name = message.author.display_name,
-                user_id = message.author.id
-                )
-            )
+                await self.onboard_website(channel, message, user)
+            
                 
         except Exception as e:
             print(e, flush=True)
