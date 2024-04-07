@@ -4,7 +4,8 @@ import config
 TABLE_NAMES = [
     "Projects",
     "Tasks",
-    "Onboarding Events"
+    "Onboarding Events",
+    "Join Pause AI",
 ]
 
 class Tables:
@@ -38,5 +39,9 @@ class Tables:
     @property
     def onboarding_events(self) -> Airtable:
         return self.get_table("Onboarding Events")
+    
+    @property
+    def join_pause_ai(self) -> Airtable:
+        return self.get_table("Join Pause AI")
 
 TABLES = Tables()
