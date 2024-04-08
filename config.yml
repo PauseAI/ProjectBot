@@ -10,6 +10,9 @@ onboarding_channel_id:
 polling_interval: 
   prod: 300
   staging: 10
+slow_repeat_interval:
+  prod: 10000
+  staging: 10
 admin_user_ids:
   prod:
     - 252771041464680449 # Maxime F

@@ -6,6 +6,7 @@ TABLE_NAMES = [
     "Tasks",
     "Onboarding Events",
     "Join Pause AI",
+    "Volunteers"
 ]
 
 class Tables:
@@ -40,5 +41,9 @@ class Tables:
     @property
     def join_pause_ai(self) -> Airtable:
         return self.get_table("Join Pause AI")
+    
+    @property
+    def volunteers(self) -> Airtable:
+        return self.get_table("Volunteers")
 
 TABLES = Tables()

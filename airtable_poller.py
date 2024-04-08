@@ -6,8 +6,8 @@ from config import CONFIG
 POLLERS = []
 
 class AirtablePoller:
-    def __init__(self, table_name: str, interval: int = 10):
-        self.interval = interval
+    def __init__(self, table_name: str, config_name: str):
+        self.config_name = config_name
         self.table_name = table_name
         self.current_ids = set()
         self.listeners_add = []
@@ -15,7 +15,7 @@ class AirtablePoller:
         self.started = False
 
     async def start(self):
-        print(f"{self.table_name} poller starting", flush=True)
+        print(f"{self.table_name} poller starting. Interval: {CONFIG.get(self.config_name)}", flush=True)
         while True:
             table = TABLES.get_table(self.table_name)
             records = table.get_all(fields=[])
@@ -34,7 +34,7 @@ class AirtablePoller:
                 await self._notify_listeners(self.listeners_delete, list(deleted))
             
             self.current_ids = new_ids
-            await asyncio.sleep(self.interval)
+            await asyncio.sleep(CONFIG.get(self.config_name))
 
     async def _notify_listeners(self, listeners, ids):
         for listener in listeners:
@@ -59,5 +59,5 @@ async def start_pollers():
     from polling_actions import p_new_member
     await asyncio.gather(*[p.start() for p in POLLERS])
 
-join_poller = AirtablePoller("Join Pause AI", CONFIG.polling_interval)
+join_poller = AirtablePoller("Join Pause AI", config_name="polling_interval")
 POLLERS.append(join_poller)

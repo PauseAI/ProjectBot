@@ -73,5 +73,9 @@ class Config:
     @property
     def airtable_token(self) -> str:
         return self.get("AIRTABLE_TOKEN")
+    
+    @property
+    def slow_repeat_interval(self) -> int:
+        return self.get("slow_repeat_interval")
 
 CONFIG = Config("config.yml", "secrets.yml")
