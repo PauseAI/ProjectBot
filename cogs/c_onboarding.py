@@ -68,13 +68,25 @@ class OnboardingCog(commands.Cog):
         )
 
     async def onboard_website(self, channel: discord.Thread, message: discord.Message, 
-                        user: discord.User):
+                        user: discord.User, emoji: discord.PartialEmoji):
         matches = re.findall(r"\|\|([a-zA-Z0-9]+)\|\|", message.clean_content)
         if len(matches) != 1:
             return
         record_id = matches[0]
         record = TABLES.join_pause_ai.get(record_id)
+        if not record:
+            await user.send(f"There seems to be an error, this person is not in our database anymore, please contact an administrator.")
         joined_discord = record["fields"].get("Joined Discord", "No")
+        
+        TABLES.join_pause_ai.update(record_id, 
+            {
+                "Onboarder Name": user.display_name,
+                "Onboarder Id": str(user.id),
+                "Datetime Onboarded": dt.datetime.now().isoformat(),
+                "Emoji": str(emoji)
+            }
+        )
+
         name = record["fields"].get("Name", "Anonymous")
         if joined_discord == "Yes":
             await user.send(f"{name} has indicated that they are already on Discord.")
@@ -108,11 +120,49 @@ class OnboardingCog(commands.Cog):
             if message.type == discord.MessageType.new_member:
                 await self.onboard_discord(channel, message, user, emoji)
             else:
-                await self.onboard_website(channel, message, user)
+                await self.onboard_website(channel, message, user, emoji)
             
                 
         except Exception as e:
             print(e, flush=True)
+
+    async def undo_onboard_discord(self, message, user):
+        records = TABLES.onboarding_events.get_all()
+        matching = [r for r in records 
+                    if r["fields"].get("Message Id", "") == str(message.id)
+                    and r["fields"].get("Onboarder Id", "") == str(user.id)
+                    ]
+        if matching:
+            TABLES.onboarding_events.update(
+                matching[0]["id"],
+                {
+                    "Message Id": "",
+                    "Onboarder Name": "",
+                    "Onboarder Id": "",
+                    "Datetime Onboarded": None,
+                    "Emoji": ""
+                }
+            )
+            await user.send(CANCEL.format(name=message.author.display_name))
+
+    async def undo_onboard_website(self, message, user):
+        matches = re.findall(r"\|\|([a-zA-Z0-9]+)\|\|", message.clean_content)
+        if len(matches) != 1:
+            return
+        record_id = matches[0]
+        record = TABLES.join_pause_ai.get(record_id)
+        if not record:
+            return
+        TABLES.join_pause_ai.update(
+            record_id,
+            {
+                "Onboarder Name": "",
+                "Onboarder Id": "",
+                "Datetime Onboarded": None,
+                "Emoji": ""
+            }
+        )
+        await user.send(CANCEL.format(name=message.author.display_name))
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
@@ -121,27 +171,18 @@ class OnboardingCog(commands.Cog):
             if channel.id != CONFIG.onboarding_channel_id:
                 return
             message = await channel.fetch_message(payload.message_id)
-            if message.type != discord.MessageType.new_member:
+            if message.type != discord.MessageType.new_member and not message.content.startswith("🆕:"):
                 return
-            # A reaction has been removed on a new member message
+            # A reaction has been removed on a new member message (from discord or website)
             user = await self.bot.fetch_user(payload.user_id)
-            records = TABLES.onboarding_events.get_all()
-            matching = [r for r in records 
-                        if r["fields"].get("Message Id", "") == str(payload.message_id)
-                        and r["fields"].get("Onboarder Id", "") == str(user.id)
-                        ]
-            if matching:
-                TABLES.onboarding_events.update(
-                    matching[0]["id"],
-                    {
-                        "Message Id": "",
-                        "Onboarder Name": "",
-                        "Onboarder Id": "",
-                        "Datetime Onboarded": None,
-                        "Emoji": ""
-                    }
-                )
-                await user.send(CANCEL.format(name=message.author.display_name))
+            emoji = payload.emoji
+            if str(emoji) in {"⛔", "🔁"}:
+                # Reserved emojis
+                return
+            if message.type == discord.MessageType.new_member:
+                await self.undo_onboard_discord(message, user)
+            else:
+                await self.undo_onboard_website(message, user)
 
         except Exception as e:
             print(e, flush=True)
@@ -178,55 +219,6 @@ class OnboardingCog(commands.Cog):
         except Exception as e:
             print(e, flush=True)
 
-    @commands.command(name="leaderboard", description="Onboarding Leaderboard")
-    @admin_only()
-    async def leaderboard(self, context: commands.Context):
-        try:
-            records = TABLES.onboarding_events.get_all()
-
-            users_dict = {}
-            for record in records:
-                emoji = record["fields"].get("Emoji", "")
-                if emoji in {"⛔", "🔁"}:
-                    continue
-                onboarder_id = record["fields"].get("Onboarder Id", "")
-                if not onboarder_id:
-                    continue
-                if onboarder_id not in users_dict:
-                    users_dict[onboarder_id] = {}
-                if emoji not in users_dict[onboarder_id]:
-                    users_dict[onboarder_id][emoji] = 0
-                users_dict[onboarder_id][emoji] += 1
-            
-            # Create the emoji rankings
-            emoji_dict = {}
-            for user, emojis in users_dict.items():
-                for emoji, count in emojis.items():
-                    if emoji not in emoji_dict:
-                        emoji_dict[emoji] = (user, count)
-                    else:
-                        current_user, current_count = emoji_dict[emoji]
-                        if count > current_count:
-                            emoji_dict[emoji] = (user, count)
-            
-            # Sort the emoji rankings based on count in descending order
-            sorted_rankings = sorted(emoji_dict.items(), key=lambda x: x[1][1], reverse=True)
-
-            # Send the emoji rankings
-            rankings = "Emoji Rankings:\n"
-            medal_emojis = ["🥇", "🥈", "🥉"]
-            for i, (emoji, (user_id, count)) in enumerate(sorted_rankings):
-                if count <= 2:
-                    continue
-                user = self.bot.get_user(int(user_id))
-                if not user:
-                    continue
-                medal = medal_emojis[i] if i < len(medal_emojis) else "🏅"
-                rankings += f"{medal}  -  {emoji}{user.display_name}{emoji}  -  {count} onboardings\n"
-            await context.send(rankings)
-            
-        except Exception as e:
-            print(e, flush=True)
 
 async def setup(bot):
     await bot.add_cog(OnboardingCog(bot))
