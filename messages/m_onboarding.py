@@ -65,3 +65,8 @@ If you need a shortlist of our tiny tasks that everyone should be able to contri
 !tasks
 ```
 """
+# CAREFUL: the syntax of the following message matters for the retrieval
+        # It should start with this exact sequence "emoji:" and end with the id under
+        # double brackets
+NEW_SIGNUP = """🆕: **{name}** from {country} signed up on the website! ||{record_id}||
+> {how_to_help}"""

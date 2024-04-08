@@ -11,6 +11,7 @@ airtable_base_id_staging = 'appFY0WxDonY1Jgb1'
 onboarding_channel_id = 1174807044990193775
 onboarding_channel_id_staging = 1214198954321907845
 polling_interval = 300
+polling_interval_staging = 10
 admin_user_ids = [
     252771041464680449, # Maxime F
     211238287522791425, # Joep

@@ -16,6 +16,7 @@ if __name__ == "__main__":
         config.airtable_base_id = config.airtable_base_id_staging
         config.discord_bot_secret = config.discord_bot_secret_staging
         config.onboarding_channel_id = config.onboarding_channel_id_staging
+        config.polling_interval = config.polling_interval_staging
         TABLES.set_staging()
     
     asyncio.run(main())
