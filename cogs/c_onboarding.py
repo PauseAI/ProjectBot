@@ -5,7 +5,7 @@ from custom_decorators import admin_only
 from config import CONFIG
 from airtable_client import TABLES
 import datetime as dt
-from messages.m_onboarding import INITIAL, MET, REPLIED, CANCEL, WEBSITE
+from messages.m_onboarding import INITIAL, MET, REPLIED, CANCEL, WEBSITE, ON_DISCORD, USER_NOT_FOUND
 import re
 
 class OnboardingCog(commands.Cog):
@@ -99,7 +99,8 @@ class OnboardingCog(commands.Cog):
             city=record["fields"].get("City", ""),
             how_to_help=record["fields"].get("How do you want to help?", ""),
             hours_per_week=record["fields"].get("How many hours per week could you spend volunteering with PauseAI?", ""),
-            types_of_action=record["fields"].get("What types of action(s) would you be interested in?", "")
+            types_of_action=record["fields"].get("What types of action(s) would you be interested in?", ""),
+            record_id = record_id
         ))
 
     @commands.Cog.listener()
@@ -188,10 +189,29 @@ class OnboardingCog(commands.Cog):
             print(e, flush=True)
 
     @commands.command(name="onboarding", description="The onboarding pipeline")
-    async def onboarding(self, context: commands.Context, stage: str, user_id: str):
+    async def onboarding(self, context: commands.Context, stage: str, user_id: str, record_id: str = ""):
         try:
-            if stage not in ["replied", "met"]:
+            if stage not in ["replied", "met", "discord"]:
                 await context.author.send(f"Unknown onboarding stage: {stage}. The only valid options are 'replied' and 'met'")
+                return
+            if stage=="discord":
+                # First we convert the provide alphanumeric user name into a user id
+                # (unless it was already a user id)
+                try:
+                    user_name = self.bot.get_user(int(user_id))
+                except ValueError:
+                    user_name = user_id
+                    user = discord.utils.get(self.bot.users, name=user_id)
+                    if not user:
+                        await context.author.send(USER_NOT_FOUND.format(user_name=user_name))
+                        return
+                    user_id = str(user.id)
+                TABLES.join_pause_ai.update(record_id, {
+                    "JoinedDiscord": "Yes",
+                    "Discord Username": user_name,
+                    "Discord Id": user_id
+                    })
+                await context.author.send(ON_DISCORD.format(name=user_name))
                 return
             records = TABLES.onboarding_events.get_all()
             matching_user_id = [r for r in records 
