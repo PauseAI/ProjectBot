@@ -38,8 +38,8 @@ Once they have signed up on discord, please send me their username like so:
 ON_DISCORD = """🌞Stellar!🌞
 {name} can now go through the regular Discord onboarding pipeline!"""
 
-USER_NOT_FOUND = """Unable to find this user name on the Discord server: {user_name}.
-On Discord, the user name can be found in someone's profile, just under their display name"""
+USER_NOT_FOUND = """Unable to find this username on the Discord server: {user_name}.
+The username can be found by opening someone's profile, just under their display name."""
 
 REPLIED = """🌞Amazing! {name} replied to you!🌞
 ## Onboarding Guide

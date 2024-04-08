@@ -163,7 +163,7 @@ class OnboardingCog(commands.Cog):
                 "Emoji": ""
             }
         )
-        await user.send(CANCEL.format(name=message.author.display_name))
+        await user.send(CANCEL.format(name=record["fields"].get("Name", "Anonymous")))
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
