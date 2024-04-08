@@ -76,7 +76,12 @@ class OnboardingCog(commands.Cog):
         record = TABLES.join_pause_ai.get(record_id)
         if not record:
             await user.send(f"There seems to be an error, this person is not in our database anymore, please contact an administrator.")
-        joined_discord = record["fields"].get("Joined Discord", "No")
+        joined_discord = record["fields"].get("JoinedDiscord", "No")
+
+        name = record["fields"].get("Name", "Anonymous")
+        if joined_discord == "Yes":
+            await user.send(f"{name} has indicated that they are already on Discord.")
+            return
         
         TABLES.join_pause_ai.update(record_id, 
             {
@@ -86,11 +91,6 @@ class OnboardingCog(commands.Cog):
                 "Emoji": str(emoji)
             }
         )
-
-        name = record["fields"].get("Name", "Anonymous")
-        if joined_discord == "Yes":
-            await user.send(f"{name} has indicated that they are already on Discord.")
-            return
 
         await user.send(WEBSITE.format(
             name=name,
