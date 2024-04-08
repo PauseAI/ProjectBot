@@ -8,7 +8,7 @@ async def on_new_member(id: str):
     try:
         record = TABLES.join_pause_ai.get(id)
         name = record["fields"].get("Name") or "Anonymous"
-        onboarding_channel = client.get_channel(config.onboarding_channel_id_staging)
+        onboarding_channel = client.get_channel(config.onboarding_channel_id)
         # CAREFUL: the syntax of the following message matters for the retrieval
         # It should start with this exact sequence "emoji:" and end with the id under
         # double brackets
