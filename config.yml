@@ -1,0 +1,23 @@
+openai_organization: 
+  prod: "org-DP5OE4ilCc68WugMCjHvlNCN"
+  staging: "org-DP5OE4ilCc68WugMCjHvlNCN"
+airtable_base_id: 
+  prod: "appWPTGqZmUcs3NWu"
+  staging: "appFY0WxDonY1Jgb1"
+onboarding_channel_id: 
+  prod: 1174807044990193775
+  staging: 1214198954321907845
+polling_interval: 
+  prod: 300
+  staging: 10
+admin_user_ids:
+  prod:
+    - 252771041464680449 # Maxime F
+    - 211238287522791425 # Joep
+    - 228252768056508437 # Nathan
+    - 732773275238793266 # Felix
+    - 312360228555456533 # Will P
+    - 232972493957103618 # Pato
+    - 346706777305251840 # Chris G
+  staging:
+    - 252771041464680449 # Maxime F

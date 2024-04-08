@@ -1,11 +1,11 @@
 from openai import OpenAI
 import json
 import jsonschema
-import config
+from config import CONFIG
 from data_model import Task
 from typing import List
 
-client = OpenAI(api_key = config.openai_api_key, organization=config.openai_organization)
+client = OpenAI(api_key = CONFIG.openai_api_key, organization=CONFIG.openai_organization)
 
 def retries(f):
     """

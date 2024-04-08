@@ -2,7 +2,7 @@ from discord.ext import commands
 from discord import Client
 import discord
 from custom_decorators import admin_only
-import config
+from config import CONFIG
 from airtable_client import TABLES
 import datetime as dt
 
@@ -14,7 +14,7 @@ class SpecialCog(commands.Cog):
     @admin_only()
     async def populate(self, context: commands.Context):
         try:
-            channel = await self.bot.fetch_channel(config.onboarding_channel_id)
+            channel = await self.bot.fetch_channel(CONFIG.onboarding_channel_id)
             messages = [
                 msg async for msg in channel.history(limit=1000)
                 if msg.type==discord.MessageType.new_member

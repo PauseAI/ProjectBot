@@ -1,46 +1,77 @@
 import yaml
 import os
+from typing import List, Any
 
-projects_db_id = "0aa5ed2c00034cdd8e3923c5af11e237"
-tasks_db_id = "d67272ac6a8c4511bde0fa7db7da86c9"
-projects_db_id_staging = "16d604fad7364ee5b1d111e33b739310"
-tasks_db_id_staging = "86dc1d61ac814cae8a850be348092758"
-openai_organization = "org-DP5OE4ilCc68WugMCjHvlNCN"
-airtable_base_id = 'appWPTGqZmUcs3NWu'
-airtable_base_id_staging = 'appFY0WxDonY1Jgb1'
-onboarding_channel_id = 1174807044990193775
-onboarding_channel_id_staging = 1214198954321907845
-polling_interval = 300
-polling_interval_staging = 10
-admin_user_ids = [
-    252771041464680449, # Maxime F
-    211238287522791425, # Joep
-    228252768056508437, # Nathan
-    732773275238793266, # Felix
-    312360228555456533, # Will P
-    232972493957103618, # Pato
-    346706777305251840, # Chris G
-]
+_SECRETS = ["DISCORD_BOT_SECRET", "OPENAI_API_KEY", "AIRTABLE_TOKEN"]
 
-# ----- SECRETS -------------------
-try:
-    with open('secrets.yml', 'r') as file:
-        secrets = yaml.safe_load(file)
-except FileNotFoundError:
-    secrets = {}
+class Config:
+    def __init__(self, config_file: str, secrets_file: str = None):
+        self._staging = False
+        self._staging_vars = {}
+        self._prod_vars = {}
 
-discord_bot_secret = ( os.environ["DISCORD_BOT_SECRET"] 
-                      if "DISCORD_BOT_SECRET" in os.environ 
-                      else secrets["discord_bot_secret"] )
-discord_bot_secret_staging = ( os.environ["DISCORD_BOT_SECRET_STAGING"] 
-                      if "DISCORD_BOT_SECRET_STAGING" in os.environ 
-                      else secrets["discord_bot_secret_staging"] )
-notion_integration_token = ( os.environ["NOTION_INTEGRATION_TOKEN"] 
-                      if "NOTION_INTEGRATION_TOKEN" in os.environ 
-                      else secrets["notion_integration_token"] )
-openai_api_key = ( os.environ["OPENAI_API_KEY"] 
-                      if "OPENAI_API_KEY" in os.environ 
-                      else secrets["openai_api_key"] )
-airtable_token = ( os.environ["AIRTABLE_TOKEN"] 
-                      if "AIRTABLE_TOKEN" in os.environ 
-                      else secrets["airtable_token"] )
+        with open(config_file, "r") as f:
+            config_data = yaml.safe_load(f)
+
+        try:
+            # This file does not have to exist. In production, secrets are stored
+            # in environment variables. This is for easy local development
+            with open(secrets_file, 'r') as file:
+                secrets = yaml.safe_load(file)
+        except FileNotFoundError:
+            secrets = {}
+
+        for var_name, d in config_data.items():
+            self._prod_vars[var_name] = d["prod"]
+            self._staging_vars[var_name] = d["staging"]
+
+        for var_name in _SECRETS:
+            if var_name in secrets:
+                self._prod_vars[var_name] = secrets[var_name]["prod"]
+                self._staging_vars[var_name] = secrets[var_name]["staging"]
+            else:
+                self._prod_vars[var_name] = os.environ[var_name]
+                #self._staging_vars[var_name] = os.environ[var_name]
+
+    def set_staging(self):
+        self._staging = True
+    
+    def set_prod(self):
+        self._staging = False
+
+    def get(self, var_name: str) -> Any:
+        return self._staging_vars[var_name] if self._staging else self._prod_vars[var_name]
+        
+    @property
+    def openai_organization(self) -> str:
+        return self.get("openai_organization")
+    
+    @property
+    def airtable_base_id(self) -> str:
+        return self.get("airtable_base_id")
+    
+    @property
+    def onboarding_channel_id(self) -> int:
+        return self.get("onboarding_channel_id")
+    
+    @property
+    def polling_interval(self) -> int:
+        return self.get("polling_interval")
+    
+    @property
+    def admin_user_ids(self) -> List[str]:
+        return self.get("admin_user_ids")
+    
+    @property
+    def discord_bot_secret(self) -> str:
+        return self.get("DISCORD_BOT_SECRET")
+    
+    @property
+    def openai_api_key(self) -> str:
+        return self.get("OPENAI_API_KEY")
+    
+    @property
+    def airtable_token(self) -> str:
+        return self.get("AIRTABLE_TOKEN")
+
+CONFIG = Config("config.yml", "secrets.yml")

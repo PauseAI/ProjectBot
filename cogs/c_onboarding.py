@@ -2,7 +2,7 @@ from discord.ext import commands
 from discord import Client
 import discord
 from custom_decorators import admin_only
-import config
+from config import CONFIG
 from airtable_client import TABLES
 import datetime as dt
 from messages.m_onboarding import INITIAL, MET, REPLIED, CANCEL, WEBSITE
@@ -94,7 +94,7 @@ class OnboardingCog(commands.Cog):
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         try:
             channel = await self.bot.fetch_channel(payload.channel_id)
-            if channel.id != config.onboarding_channel_id:
+            if channel.id != CONFIG.onboarding_channel_id:
                 return
             message = await channel.fetch_message(payload.message_id)
             if message.type != discord.MessageType.new_member and not message.content.startswith("🆕:"):
@@ -118,7 +118,7 @@ class OnboardingCog(commands.Cog):
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
         try:
             channel = await self.bot.fetch_channel(payload.channel_id)
-            if channel.id != config.onboarding_channel_id:
+            if channel.id != CONFIG.onboarding_channel_id:
                 return
             message = await channel.fetch_message(payload.message_id)
             if message.type != discord.MessageType.new_member:

@@ -1,5 +1,5 @@
 from airtable import Airtable
-import config
+from config import CONFIG
 
 TABLE_NAMES = [
     "Projects",
@@ -13,20 +13,17 @@ class Tables:
         self.staging = False
         self._tables = {}
         self._tables_staging = {}
+        self.reset()
+    
+    def reset(self):
         for table_name in TABLE_NAMES:
             self._tables[table_name] = Airtable(
-                config.airtable_base_id, table_name, 
-                api_key=config.airtable_token)
-            self._tables_staging[table_name] = Airtable(
-                config.airtable_base_id_staging, table_name, 
-                api_key=config.airtable_token)
-            
-    def set_staging(self):
-        self.staging = True
+                CONFIG.airtable_base_id, table_name, 
+                api_key=CONFIG.airtable_token)
 
     def get_table(self, name: str) -> Airtable:
         assert name in TABLE_NAMES, f"There is no table named {name}"
-        return self._tables_staging[name] if self.staging else self._tables[name]
+        return self._tables[name]
     
     @property
     def projects(self) -> Airtable:
