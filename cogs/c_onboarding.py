@@ -5,7 +5,9 @@ from custom_decorators import admin_only
 from config import CONFIG
 from airtable_client import TABLES
 import datetime as dt
-from messages.m_onboarding import INITIAL, MET, REPLIED, CANCEL, WEBSITE, ON_DISCORD, USER_NOT_FOUND
+from messages.m_onboarding import (
+    INITIAL, MET, REPLIED, CANCEL, WEBSITE, ON_DISCORD, USER_NOT_FOUND,
+    REMINDER)
 import re
 
 class OnboardingCog(commands.Cog):
@@ -187,6 +189,30 @@ class OnboardingCog(commands.Cog):
 
         except Exception as e:
             print(e, flush=True)
+
+    @commands.command(name="onboardinglist", description="List of people I am onboarding")
+    async def onboardinglist(self, context: commands.Context):
+        records = TABLES.onboarding_events.get_all()
+        matching = [r["fields"] for r in records 
+                    if r["fields"].get("Onboarder Id") == str(context.author.id)]
+        if not matching:
+            await context.author.send("It looks like you are not onboarding anyone at the moment")
+            return
+        
+        messages = []
+        for fields in matching:
+            if fields.get("Face Meeting"):
+                messages.append(f"- **{fields.get('Newcomer Name')}**: DONE")
+                continue
+            stage = "met" if fields.get("Initial Reply") else "replied"
+            messages.append(REMINDER.format(
+                name=fields.get("Newcomer Name"),
+                user_id=fields.get("Newcomer Id"),
+                stage=stage
+                ))
+        
+        for i in range(len(messages)//5+1):
+            await context.author.send("\n".join(messages[i*5:(i+1)*5]))
 
     @commands.command(name="onboarding", description="The onboarding pipeline")
     async def onboarding(self, context: commands.Context, stage: str, user_id: str, record_id: str = ""):

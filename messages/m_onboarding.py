@@ -78,3 +78,5 @@ If you need a shortlist of our tiny tasks that everyone should be able to contri
         # double brackets
 NEW_SIGNUP = """🆕: **{name}** from {country} signed up on the website! ||{record_id}||
 > {how_to_help}"""
+
+REMINDER = """- **{name}**. Command for next stage:```!onboarding {stage} {user_id}```"""
