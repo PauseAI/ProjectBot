@@ -18,6 +18,12 @@ async def resolve_user_ids():
                     user = discord.utils.get(client.users, name=user_name)
                     if user:
                         table.update(record["id"], {"Discord Id": str(user.id)})
+                        return
+                    # This was not the username, let's try the display name
+                    user = discord.utils.get(client.users, display_name=user_name)
+                    if user:
+                        table.update(record["id"], {"Discord Id": str(user.id)})
+                        return
                 if user_id and not user_name:
                     try:
                         user = client.get_user(int(user_id))
