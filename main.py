@@ -11,9 +11,9 @@ async def main():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Discord Bot')
-    parser.add_argument('--staging', action='store_true', help='Start the bot in staging mode')
+    parser.add_argument('--prod', action='store_true', help='Start the bot in production mode')
     args = parser.parse_args()
-    if args.staging:
+    if not args.prod:
         CONFIG.set_staging()
         TABLES.reset()
     

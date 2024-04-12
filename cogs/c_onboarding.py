@@ -81,8 +81,9 @@ class OnboardingCog(commands.Cog):
         joined_discord = record["fields"].get("JoinedDiscord", "No")
 
         name = record["fields"].get("Name", "Anonymous")
+        user_name = record["fields"].get("Discord Username", "not mentioned")
         if joined_discord == "Yes":
-            await user.send(f"{name} has indicated that they are already on Discord.")
+            await user.send(f"{name} has indicated that they are already on Discord. Their username is {user_name}")
             return
         
         TABLES.join_pause_ai.update(record_id, 
@@ -117,7 +118,7 @@ class OnboardingCog(commands.Cog):
             # A reaction has been added on a new member message (from discord or website)
             user = await self.bot.fetch_user(payload.user_id)
             emoji = payload.emoji
-            if str(emoji) in {"⛔", "🔁"}:
+            if str(emoji) in {"⛔", "🔁", "🧵"}:
                 # Reserved emojis
                 return
             if message.type == discord.MessageType.new_member:
@@ -179,7 +180,7 @@ class OnboardingCog(commands.Cog):
             # A reaction has been removed on a new member message (from discord or website)
             user = await self.bot.fetch_user(payload.user_id)
             emoji = payload.emoji
-            if str(emoji) in {"⛔", "🔁"}:
+            if str(emoji) in {"⛔", "🔁", "🧵"}:
                 # Reserved emojis
                 return
             if message.type == discord.MessageType.new_member:
