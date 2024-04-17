@@ -1,14 +1,15 @@
 from discord.ext import commands
 from discord import Client
 import discord
-from custom_decorators import admin_only
+import traceback
 from config import CONFIG
 from airtable_client import TABLES
-import datetime as dt
 from messages.m_onboarding import (
     INITIAL, MET, REPLIED, CANCEL, WEBSITE, ON_DISCORD, USER_NOT_FOUND,
     REMINDER)
-import re
+from cogs.onboarding import (find_user_name_id, format_message_discord, get_pai_member, insert_newcomer, update_joined_discord, update_onboarder, 
+                        update_joined, record_id_from_message, format_message_website,
+                        get_onboarder, erase_onboarder)
 
 _ONBOARD_PIPELINE = [
     {
@@ -23,6 +24,8 @@ _ONBOARD_PIPELINE = [
     }
 ]
 
+RESERVED_EMOJIS = {"⛔", "🔁", "🧵", "🚩"}
+
 class OnboardingCog(commands.Cog):
     def __init__(self, bot: Client):
         self.bot = bot
@@ -30,97 +33,49 @@ class OnboardingCog(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
         try:
-            records = TABLES.onboarding_events.get_all()
-            matching = [r for r in records if r["fields"].get("Newcomer Id", "") == str(member.id)]
-            if matching:
-                # This user has already joined in the past. We don't create a new entry
+            if get_pai_member(member):
+                # already a member
                 return
-            joined_at = dt.date.today().isoformat()
-            if member.joined_at:
-                joined_at = member.joined_at.isoformat()
-            TABLES.onboarding_events.insert({
-                "Newcomer Id": str(member.id),
-                "Newcomer Name": member.display_name,
-                "Datetime Joined": joined_at,
-            }, typecast=True)
+            insert_newcomer(member)
         except Exception as e:
             print(e, flush=True)
 
-    async def onboard_discord(self, channel: discord.Thread, message: discord.Message, 
+    async def onboard_discord(self, message: discord.Message, 
                         user: discord.User, emoji: discord.PartialEmoji):
-        records = TABLES.onboarding_events.get_all()
-        matching = [r for r in records if r["fields"]["Newcomer Id"] == str(message.author.id)]
-        if matching:
-            # This user is already in our database
-            # TODO: Currently there is a timezone bug that I don't know how to fix
-            TABLES.onboarding_events.update(
-                matching[0]["id"],
-                {
-                    "Datetime Joined": message.created_at.isoformat(),
-                    "Message Id": str(message.id),
-                    "Onboarder Name": user.display_name,
-                    "Onboarder Id": str(user.id),
-                    "Datetime Onboarded": dt.datetime.now().isoformat(),
-                    "Emoji": str(emoji)
-                }
-            )
-        else:
-            # This user is not in our database
-            TABLES.onboarding_events.insert({
-                "Datetime Joined": message.created_at.isoformat(),
-                "Newcomer Name": message.author.display_name,
-                "Newcomer Id": str(message.author.id),
-                "Message Id": str(message.id),
-                "Onboarder Name": user.display_name,
-                "Onboarder Id": str(user.id),
-                "Datetime Onboarded": dt.datetime.now().isoformat(),
-                "Emoji": str(emoji)
-            }, typecast=True)
+        record_id = get_pai_member(message.author)
+        if not record_id:
+            # this user was not in the database, we add them
+            record_id = insert_newcomer(message.author)
+        # then we update the onboarding
+        update_joined(record_id, message)
+        update_onboarder(TABLES.onboarding_events, record_id, user, emoji)
         await user.send(INITIAL.format(
             name = message.author.display_name,
             user_id = message.author.id
             )
         )
 
-    async def onboard_website(self, channel: discord.Thread, message: discord.Message, 
+    async def onboard_website(self, message: discord.Message, 
                         user: discord.User, emoji: discord.PartialEmoji):
-        matches = re.findall(r"\|\|([a-zA-Z0-9]+)\|\|", message.clean_content)
-        if len(matches) != 1:
+        record_id = record_id_from_message(message)
+        if record_id is None:
             return
-        record_id = matches[0]
         record = TABLES.join_pause_ai.get(record_id)
         if not record:
             await user.send(f"There seems to be an error, this person is not in our database anymore, please contact an administrator.")
-        joined_discord = record["fields"].get("JoinedDiscord", "No")
-
-        name = record["fields"].get("Name", "Anonymous")
-        user_name = record["fields"].get("Discord Username", "not mentioned")
-        if joined_discord == "Yes":
-            await user.send(f"{name} has indicated that they are already on Discord. Their username is {user_name}")
+        if record["fields"].get("JoinedDiscord", "No") == "Yes":
+            await user.send(format_message_website(
+                "{name} has indicated that they are already on Discord. Their username is {user_name}",
+                record
+            ))
             return
         
-        TABLES.join_pause_ai.update(record_id, 
-            {
-                "Onboarder Name": user.display_name,
-                "Onboarder Id": str(user.id),
-                "Datetime Onboarded": dt.datetime.now().isoformat(),
-                "Emoji": str(emoji)
-            }
-        )
-
-        await user.send(WEBSITE.format(
-            name=name,
-            email=record["fields"].get("Email address", ""),
-            country=record["fields"].get("Country", ""),
-            city=record["fields"].get("City", ""),
-            how_to_help=record["fields"].get("How do you want to help?", ""),
-            hours_per_week=record["fields"].get("How many hours per week could you spend volunteering with PauseAI?", ""),
-            types_of_action=record["fields"].get("What types of action(s) would you be interested in?", ""),
-            record_id = record_id
-        ))
+        update_onboarder(TABLES.join_pause_ai, record_id, user, emoji)
+        await user.send(format_message_website(WEBSITE, record))
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
+        print("ADDING", flush=True)
         try:
             channel = await self.bot.fetch_channel(payload.channel_id)
             if channel.id != CONFIG.onboarding_channel_id:
@@ -131,55 +86,33 @@ class OnboardingCog(commands.Cog):
             # A reaction has been added on a new member message (from discord or website)
             user = await self.bot.fetch_user(payload.user_id)
             emoji = payload.emoji
-            if str(emoji) in {"⛔", "🔁", "🧵"}:
+            if str(emoji) in RESERVED_EMOJIS:
                 # Reserved emojis
                 return
             if message.type == discord.MessageType.new_member:
-                await self.onboard_discord(channel, message, user, emoji)
+                await self.onboard_discord(message, user, emoji)
             else:
-                await self.onboard_website(channel, message, user, emoji)
+                await self.onboard_website(message, user, emoji)
             
                 
         except Exception as e:
-            print(e, flush=True)
+            print(traceback.format_exc(), flush=True)
 
     async def undo_onboard_discord(self, message, user):
-        records = TABLES.onboarding_events.get_all()
-        matching = [r for r in records 
-                    if r["fields"].get("Message Id", "") == str(message.id)
-                    and r["fields"].get("Onboarder Id", "") == str(user.id)
-                    ]
-        if matching:
-            TABLES.onboarding_events.update(
-                matching[0]["id"],
-                {
-                    "Message Id": "",
-                    "Onboarder Name": "",
-                    "Onboarder Id": "",
-                    "Datetime Onboarded": None,
-                    "Emoji": ""
-                }
-            )
+        record_id = get_onboarder(message, user)
+        if record_id:
+            erase_onboarder(TABLES.onboarding_events, record_id)
             await user.send(CANCEL.format(name=message.author.display_name))
 
     async def undo_onboard_website(self, message, user):
-        matches = re.findall(r"\|\|([a-zA-Z0-9]+)\|\|", message.clean_content)
-        if len(matches) != 1:
+        record_id = record_id_from_message(message)
+        if record_id is None:
             return
-        record_id = matches[0]
         record = TABLES.join_pause_ai.get(record_id)
         if not record:
             return
-        TABLES.join_pause_ai.update(
-            record_id,
-            {
-                "Onboarder Name": "",
-                "Onboarder Id": "",
-                "Datetime Onboarded": None,
-                "Emoji": ""
-            }
-        )
-        await user.send(CANCEL.format(name=record["fields"].get("Name", "Anonymous")))
+        erase_onboarder(TABLES.join_pause_ai, record_id)
+        await user.send(format_message_website(CANCEL, record))
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
@@ -193,7 +126,7 @@ class OnboardingCog(commands.Cog):
             # A reaction has been removed on a new member message (from discord or website)
             user = await self.bot.fetch_user(payload.user_id)
             emoji = payload.emoji
-            if str(emoji) in {"⛔", "🔁", "🧵"}:
+            if str(emoji) in RESERVED_EMOJIS:
                 # Reserved emojis
                 return
             if message.type == discord.MessageType.new_member:
@@ -202,34 +135,30 @@ class OnboardingCog(commands.Cog):
                 await self.undo_onboard_website(message, user)
 
         except Exception as e:
-            print(e, flush=True)
+            print(traceback.format_exc(), flush=True)
 
     @commands.command(name="onboardinglist", description="List of people I am onboarding")
     async def onboardinglist(self, context: commands.Context):
         records = TABLES.onboarding_events.get_all()
-        matching = [r["fields"] for r in records 
+        matching = [r for r in records 
                     if r["fields"].get("Onboarder Id") == str(context.author.id)]
         if not matching:
             await context.author.send("It looks like you are not onboarding anyone at the moment")
             return
         
         messages = []
-        for fields in matching:
-            if fields.get("Face Meeting"):
-                messages.append(f"- **{fields.get('Newcomer Name')}**: DONE")
+        for record in matching:
+            if record["fields"].get("Face Meeting"):
+                messages.append(f"- **{record['fields'].get('Newcomer Name')}**: DONE")
                 continue
-            stage = "met" if fields.get("Initial Reply") else "replied"
-            messages.append(REMINDER.format(
-                name=fields.get("Newcomer Name"),
-                user_id=fields.get("Newcomer Id"),
-                stage=stage
-                ))
+            stage = "met" if record["fields"].get("Initial Reply") else "replied"
+            messages.append(format_message_discord(REMINDER, record, stage=stage))
         
         for i in range(len(messages)//5+1):
             await context.author.send("\n".join(messages[i*5:(i+1)*5]))
 
     @commands.command(name="onboarding", description="The onboarding pipeline")
-    async def onboarding(self, context: commands.Context, stage: str, user_id: str, record_id: str = ""):
+    async def onboarding(self, context: commands.Context, stage: str, user: str, record_id: str = ""):
         try:
             if stage not in ["replied", "met", "discord"]:
                 await context.author.send(f"Unknown onboarding stage: {stage}. The only valid options are 'replied' and 'met'")
@@ -237,46 +166,33 @@ class OnboardingCog(commands.Cog):
             if stage=="discord":
                 # First we convert the provide alphanumeric user name into a user id
                 # (unless it was already a user id)
-                try:
-                    user_name = self.bot.get_user(int(user_id))
-                except ValueError:
-                    user_name = user_id
-                    user = discord.utils.get(self.bot.users, name=user_id)
-                    if not user:
-                        await context.author.send(USER_NOT_FOUND.format(user_name=user_name))
-                        return
-                    user_id = str(user.id)
-                TABLES.join_pause_ai.update(record_id, {
-                    "JoinedDiscord": "Yes",
-                    "Discord Username": user_name,
-                    "Discord Id": user_id
-                    })
+                user_name, user_id = find_user_name_id(self.bot, user)
+                if not user_id:
+                    await context.author.send(USER_NOT_FOUND.format(user_name=user))
+                    return
+                update_joined_discord(record_id, user_name, user_id)
                 await context.author.send(ON_DISCORD.format(name=user_name))
                 return
-            records = TABLES.onboarding_events.get_all()
-            matching_user_id = [r for r in records 
-                    if r["fields"].get("Newcomer Id", "") == user_id
-                    ]
-            if not matching_user_id:
+            
+            record = TABLES.onboarding_events.match("Newcomer Id", user)
+            if not record:
                 await context.author.send("Unable to find a newcomer with this id")
                 return
-            matching = [r for r in matching_user_id 
-                        if r["fields"].get("Onboarder Id", "") == str(context.author.id)]
-            if not matching:
+            if record["fields"].get("Onboarder Id", "") != str(context.author.id):
                 await context.author.send("You are not the onboarder for this newcomer")
                 return
             # We should have identified the record (although there could still be multiple)
-            record_id = matching[0]["id"]
-            fields = matching[0]["fields"]
+            record_id = record["id"]
+            fields = record["fields"]
             
             for pipeline_stage in _ONBOARD_PIPELINE:
                 if stage == pipeline_stage["name"]:
                     TABLES.onboarding_events.update(record_id, {pipeline_stage["checkbox"]: True})
-                    await context.author.send(pipeline_stage["message"].format(name=fields["Newcomer Name"], user_id=user_id))
+                    await context.author.send(pipeline_stage["message"].format(name=fields["Newcomer Name"], user_id=user))
                     return
                 
         except Exception as e:
-            print(e, flush=True)
+            print(traceback.format_exc(), flush=True)
 
 
 async def setup(bot):
