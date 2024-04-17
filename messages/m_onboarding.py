@@ -59,7 +59,7 @@ MET = """🌞Awesome! A new contributing member,thanks to you!🌞
 ## Onboarding Guide
 During this 1 on 1 meeting, your goal is to:
 - Orient them around the discord
-- Tell them about how we work, the different teams, the project (high level)
+- Tell them about how we work, the different teams, the projects (high level)
 - Talk about their skills, interests and the time they will be able to contribute
 - Present them with projects that can suit them
 - The next step for them is to pick a project or team. Once this is done you will introduce them to the project or team lead.

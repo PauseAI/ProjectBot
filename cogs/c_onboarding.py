@@ -10,6 +10,19 @@ from messages.m_onboarding import (
     REMINDER)
 import re
 
+_ONBOARD_PIPELINE = [
+    {
+        "name": "replied",
+        "message": REPLIED,
+        "checkbox": "Initial Reply"
+    },
+    {
+        "name": "met",
+        "message": MET,
+        "checkbox": "Face Meeting"
+    }
+]
+
 class OnboardingCog(commands.Cog):
     def __init__(self, bot: Client):
         self.bot = bot
@@ -256,12 +269,11 @@ class OnboardingCog(commands.Cog):
             record_id = matching[0]["id"]
             fields = matching[0]["fields"]
             
-            if stage=="replied":
-                TABLES.onboarding_events.update(record_id, {"Initial Reply": True})
-                await context.author.send(REPLIED.format(name=fields["Newcomer Name"], user_id=user_id))
-            elif stage=="met":
-                TABLES.onboarding_events.update(record_id, {"Face Meeting": True})
-                await context.author.send(MET.format(name=fields["Newcomer Name"]))
+            for pipeline_stage in _ONBOARD_PIPELINE:
+                if stage == pipeline_stage["name"]:
+                    TABLES.onboarding_events.update(record_id, {pipeline_stage["checkbox"]: True})
+                    await context.author.send(pipeline_stage["message"].format(name=fields["Newcomer Name"], user_id=user_id))
+                    return
                 
         except Exception as e:
             print(e, flush=True)
