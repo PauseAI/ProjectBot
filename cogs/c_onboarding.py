@@ -7,9 +7,10 @@ from airtable_client import TABLES
 from messages.m_onboarding import (
     INITIAL, MET, REPLIED, CANCEL, WEBSITE, ON_DISCORD, USER_NOT_FOUND,
     REMINDER)
-from cogs.onboarding import (find_user_name_id, format_message_discord, get_pai_member, insert_newcomer, update_joined_discord, update_onboarder, 
+from cogs.onboarding import (find_user_name_id, format_message_discord, get_pai_member, get_pai_member_user_id, get_researcher, has_researcher, insert_newcomer, update_joined_discord, update_onboarder, 
                         update_joined, record_id_from_message, format_message_website,
-                        get_onboarder, erase_onboarder)
+                        get_onboarder, erase_onboarder, update_researcher)
+from cogs.onboarding_manager import ONBOARDING_MANAGER
 
 _ONBOARD_PIPELINE = [
     {
@@ -40,6 +41,38 @@ class OnboardingCog(commands.Cog):
         except Exception as e:
             print(e, flush=True)
 
+    async def start_research_discord(self, message: discord.Message,
+                                     user: discord.User):
+        record_id = get_pai_member(message.author)
+        if not record_id:
+            # this user was not in the database, we add them
+            record_id = insert_newcomer(message.author)
+        # then we update the onboarding
+        update_joined(record_id, message)
+        if has_researcher(TABLES.onboarding_events, record_id):
+            await user.send("PLACEHOLDER Already has researcher")
+            return
+        update_researcher(TABLES.onboarding_events, record_id, user)
+        await user.send("PLACEHOLDER Researching")
+
+    async def end_research_discord(self, message: discord.Message,
+                                     user: discord.User, is_vip: bool):
+        record_id = get_pai_member(message.author)
+        if not record_id:
+            # this user was not in the database, we add them
+            record_id = insert_newcomer(message.author)
+        if get_researcher(TABLES.onboarding_events, record_id) != str(user.id):
+            await user.send("PLACEHOLDER You are not the researcher")
+            return
+        if not TABLES.onboarding_events.get(record_id)["fields"].get("Research Result"):
+            await user.send("PLACEHOLDER log research result first")
+            return
+        TABLES.onboarding_events.update(record_id, {
+            "Researched": True,
+            "Is VIP": is_vip
+        })
+        await user.send("PLACEHOLDER Researched")
+
     async def onboard_discord(self, message: discord.Message, 
                         user: discord.User, emoji: discord.PartialEmoji):
         record_id = get_pai_member(message.author)
@@ -69,6 +102,12 @@ class OnboardingCog(commands.Cog):
                 record
             ))
             return
+        if not record["fields"].get("Researched"):
+            await user.send(format_message_website(
+                "{name} has not been researched yet",
+                record
+            ))
+            return
         
         update_onboarder(TABLES.join_pause_ai, record_id, user, emoji)
         await user.send(format_message_website(WEBSITE, record))
@@ -90,9 +129,23 @@ class OnboardingCog(commands.Cog):
                 # Reserved emojis
                 return
             if message.type == discord.MessageType.new_member:
-                await self.onboard_discord(message, user, emoji)
+                if str(emoji) == "🔍":
+                    await self.start_research_discord(message, user)
+                elif str(emoji) == "🥇":
+                    await self.end_research_discord(message, user, True)
+                elif str(emoji) == "🥈":
+                    await self.end_research_discord(message, user, False)
+                else:
+                    await self.onboard_discord(message, user, emoji)
             else:
-                await self.onboard_website(message, user, emoji)
+                if str(emoji) == "🔍":
+                    pass
+                elif str(emoji) == "🥇":
+                    pass
+                elif str(emoji) == "🥈":
+                    pass
+                else:
+                    await self.onboard_website(message, user, emoji)
             
                 
         except Exception as e:
@@ -137,25 +190,18 @@ class OnboardingCog(commands.Cog):
         except Exception as e:
             print(traceback.format_exc(), flush=True)
 
-    @commands.command(name="onboardinglist", description="List of people I am onboarding")
-    async def onboardinglist(self, context: commands.Context):
-        records = TABLES.onboarding_events.get_all()
-        matching = [r for r in records 
-                    if r["fields"].get("Onboarder Id") == str(context.author.id)]
-        if not matching:
-            await context.author.send("It looks like you are not onboarding anyone at the moment")
+    @commands.command(name="research", description="Logging research about a user")
+    async def research(self, context: commands.Context, user_id: str, *, text: str):
+        record_id = get_pai_member_user_id(user_id)
+        if not record_id:
+            await context.author.send("PLACEHOLDER error user not found")
+        if get_researcher(TABLES.onboarding_events, record_id) != str(context.author.id):
+            await context.author.send("PLACEHOLDER You are not the researcher")
             return
-        
-        messages = []
-        for record in matching:
-            if record["fields"].get("Face Meeting"):
-                messages.append(f"- **{record['fields'].get('Newcomer Name')}**: DONE")
-                continue
-            stage = "met" if record["fields"].get("Initial Reply") else "replied"
-            messages.append(format_message_discord(REMINDER, record, stage=stage))
-        
-        for i in range(len(messages)//5+1):
-            await context.author.send("\n".join(messages[i*5:(i+1)*5]))
+        TABLES.onboarding_events.update(record_id, {
+            "Research Result": text,
+        })
+        await context.author.send(f"PLACEHOLDER Thanks for logging research now use emoji")
 
     @commands.command(name="onboarding", description="The onboarding pipeline")
     async def onboarding(self, context: commands.Context, stage: str, user: str, record_id: str = ""):
@@ -194,6 +240,25 @@ class OnboardingCog(commands.Cog):
         except Exception as e:
             print(traceback.format_exc(), flush=True)
 
+    @commands.command(name="onboardinglist", description="List of people I am onboarding")
+    async def onboardinglist(self, context: commands.Context):
+        records = TABLES.onboarding_events.get_all()
+        matching = [r for r in records 
+                    if r["fields"].get("Onboarder Id") == str(context.author.id)]
+        if not matching:
+            await context.author.send("It looks like you are not onboarding anyone at the moment")
+            return
+        
+        messages = []
+        for record in matching:
+            if record["fields"].get("Face Meeting"):
+                messages.append(f"- **{record['fields'].get('Newcomer Name')}**: DONE")
+                continue
+            stage = "met" if record["fields"].get("Initial Reply") else "replied"
+            messages.append(format_message_discord(REMINDER, record, stage=stage))
+        
+        for i in range(len(messages)//5+1):
+            await context.author.send("\n".join(messages[i*5:(i+1)*5]))
 
 async def setup(bot):
     await bot.add_cog(OnboardingCog(bot))

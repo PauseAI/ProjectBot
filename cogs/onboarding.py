@@ -5,6 +5,11 @@ import discord
 import re
 from typing import Dict, Tuple
 
+def get_pai_member_user_id(user_id: str) -> str:
+    record = TABLES.onboarding_events.match("Newcomer Id", user_id)
+    if record:
+        return record["id"]
+
 def get_pai_member(member: discord.Member) -> str:
     """
     Returns the record id if member is found or None
@@ -78,6 +83,19 @@ def update_onboarder(table: Airtable, record_id: str, user: discord.User, emoji:
         "Datetime Onboarded": dt.datetime.now().isoformat(),
         "Emoji": str(emoji)
     })
+
+def update_researcher(table: Airtable, record_id: str, user: discord.User):
+    table.update(record_id, {
+        "Researcher Name": user.display_name,
+        "Researcher Id": str(user.id),
+        "Datetime Researched": dt.datetime.now().isoformat(),
+    })
+
+def has_researcher(table: Airtable, record_id: str) -> bool:
+    return table.get(record_id)["fields"].get("Researcher Id", "") != ""
+
+def get_researcher(table: Airtable, record_id: str) -> bool:
+    return table.get(record_id)["fields"].get("Researcher Id", "")
 
 def erase_onboarder(table: Airtable, record_id: str):
     table.update(
