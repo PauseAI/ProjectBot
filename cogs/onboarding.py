@@ -108,6 +108,27 @@ def erase_onboarder(table: Airtable, record_id: str):
         }
     )
 
+def reset_researcher(table: Airtable, record_id: str):
+    table.update(
+        record_id,
+        {
+            "Researcher Name": "",
+            "Researcher Id": "",
+            "Datetime Researched": None,
+        }
+    )
+
+def reset_onboarder(table: Airtable, record_id: str):
+    table.update(
+        record_id,
+        {
+            "Onboarder Name": "",
+            "Onboarder Id": "",
+            "Datetime Onboarded": None,
+            "Emoji": ""
+        }
+    )
+
 def record_id_from_message(message: discord.Message) -> str:
     matches = re.findall(r"\|\|([a-zA-Z0-9]+)\|\|", message.clean_content)
     if len(matches) != 1:
