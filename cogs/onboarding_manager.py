@@ -24,6 +24,8 @@ def format_message(message: str, record: Dict, params: Dict) -> str:
         types_of_action = fields.get("What types of action(s) would you be interested in?", ""),
         hours_per_week = fields.get("How many hours per week could you spend volunteering with PauseAI?", ""),
         email = fields.get("Email address", ""),
+        joined_discord = fields.get("JoinedDiscord", "No"),
+        discord_username = fields.get("Discord Username", ""),
         vip_sentence = "\nThey are a VIP 🥇" if fields.get("Is VIP") else "",
         first_stage = "replied" if params.get("table_id") == "o" else "email",
         **params
