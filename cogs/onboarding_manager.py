@@ -169,6 +169,13 @@ class OnboardingManager:
                 reset_onboarder(table, record["id"])
             elif action["type"] == "database log research":
                 table.update(record["id"], {action["field_name"]: params["text"]})
+            elif action["type"] == "database set mentor":
+                table.update(record["id"], {
+                    "Mentor Name": params["provided_user_display_name"],
+                    "Mentor Id": params["provided_user_id"]
+                })
+            elif action["type"] == "database update field":
+                table.update(record["id"], {action["field_name"]: params[action["param_name"]]}, typecast=True)
             elif action["type"] == "message":
                 await user.send(format_message(action["message"], record, params))
             else:

@@ -36,7 +36,7 @@ What brings you here? Are you interested in becoming a contributing member of th
 
 Once they have replied to you, please notify me by sending me the following command:
 ```
-!onboarding {first_stage} {db_id}
+!onboarding replied {db_id}
 ```
 """
 M_START_ONBOARDING_WEBSITE = """🌞Thank you so much for onboarding {name}🌞!
@@ -54,11 +54,18 @@ Please contact them via email. If you need inspiration, you can find templates [
 **Hours per week:** {hours_per_week}
 **Email Address:** ```{email}```
 
-Once they have signed up on discord, please send me their username like so:
-```!onboarding discord <username> {db_id}```
+Once you have emailed them, please notify me like so:
+```!onboarding emailed {db_id}```
 """
 
 M_UNDO_START_ONBOARDING = """You are no longer onboarding {name}. If that was a mistake, you can add your reaction again."""
+
+M_ONBOARDING_EMAILED = """
+Thanks for emailing {name}! 
+
+Once they have signed up on discord, please send me their Discrod username like so:
+```!onboarding discord {db_id} <discord username> ```
+"""
 
 M_ONBOARDING_REPLIED = """🌞Amazing! {name} replied to you!🌞
 ## Onboarding Guide
@@ -100,10 +107,15 @@ The last stage is the final check-in.
 M_ONBOARDING_CHECK_IN = """CONGRATS!
 You have succesfully onboarded {name}"""
 
-M_ONBOARDING_EMAIL = """Well done sending an email to {name}.
+M_ONBOARDING_MENTOR = """CONGRATS!
+You have succesfully onboarded {name}"""
+
+M_ONBOARDING_EMAILED = """Well done sending an email to {name}.
 When they join discord, use this command to tell us their username:
-```!onboarding discord {db_id} <username>```
+```!onboarding joined_discord {db_id} <username>```
 """
+
+M_ONBOARDING_JOINED_DISCORD = """Amazing! Now, the discord onboarding starts ;)"""
 
 ON_DISCORD = """🌞Stellar!🌞
 {name} can now go through the regular Discord onboarding pipeline!"""

@@ -1,4 +1,5 @@
 from messages.m_onboarding import *
+from airtable_client import TABLES
 
 # -------------
 # STANDARD CONDITIONS
@@ -11,13 +12,13 @@ NOT_ABORTED = {
 DATABASE_WEBSITE = {
     "type": "check param value",
     "param_name": "table_id",
-    "param_value": "j",
+    "param_value": TABLES.join_pause_ai.table_name,
     "message": M_ERROR_WEBSITE
 }
 DATABASE_DISCORD = {
     "type": "check param value",
     "param_name": "table_id",
-    "param_value": "o",
+    "param_value": TABLES.onboarding_events.table_name,
     "message": M_ERROR_DISCORD
 }
 CHECK_IS_ONBOARDER = {
@@ -48,9 +49,13 @@ CONFIG = [
         "name": "rejoin",
         "trigger": {
             "type": "react",
-            "emoji": "🔄"
+            "emoji": "🔁"
         },
         "actions": [
+            {
+                "type": "database update tick",
+                "field_name": "Aborted"
+            },
             {
                 "type": "message",
                 "message": M_REJOIN,
@@ -75,7 +80,7 @@ CONFIG = [
         ]
     },
     {
-        "name": "abort",
+        "name": "red_flag",
         "trigger": {
             "type": "react",
             "emoji": "🚩"
@@ -116,10 +121,34 @@ CONFIG = [
         ]
     },
     {
-        "name": "undo_abort",
+        "name": "undo_red_flag",
         "trigger": {
             "type": "unreact",
             "emoji": "🚩"
+        },
+        "conditions": [
+            {
+                "type": "database check ticked",
+                "field_name": "Aborted",
+                "message": M_ERROR_UNDO_ABORT
+            }
+        ],
+        "actions": [
+            {
+                "type": "database update untick",
+                "field_name": "Aborted"
+            },
+            {
+                "type": "message",
+                "message": M_UNDO_ABORT
+            }
+        ]
+    },
+    {
+        "name": "undo_rejoin",
+        "trigger": {
+            "type": "unreact",
+            "emoji": "🔁"
         },
         "conditions": [
             {
@@ -438,11 +467,33 @@ CONFIG = [
         ]
     },
     {
-        "name": "onboading_email",
+        "name": "onboarding_mentor",
         "trigger": {
             "type": "command",
             "command": "onboarding",
-            "subcommand": "email"
+            "subcommand": "mentor"
+        },
+        "conditions": [
+            NOT_ABORTED,
+            DATABASE_DISCORD, # this is for the discord pipeline only
+            CHECK_IS_ONBOARDER,
+        ],
+        "actions": [
+            {
+                "type": "database set mentor",
+            },
+            {
+                "type": "message",
+                "message": M_ONBOARDING_MENTOR
+            }
+        ]
+    },
+    {
+        "name": "onboarding_emailed",
+        "trigger": {
+            "type": "command",
+            "command": "onboarding",
+            "subcommand": "emailed"
         },
         "conditions": [
             NOT_ABORTED,
@@ -456,7 +507,36 @@ CONFIG = [
             },
             {
                 "type": "message",
-                "message": M_ONBOARDING_EMAIL
+                "message": M_ONBOARDING_EMAILED
+            }
+        ]
+    },
+    {
+        "name": "onboarding_joined_discord",
+        "trigger": {
+            "type": "command",
+            "command": "onboarding",
+            "subcommand": "joined_discord"
+        },
+        "conditions": [
+            NOT_ABORTED,
+            DATABASE_WEBSITE, # this is for the discord pipeline only
+            CHECK_IS_ONBOARDER
+        ],
+        "actions": [
+            {
+                "type": "database update field",
+                "field_name": "Discord Id",
+                "param_name": "provided_user_id"
+            },
+            {
+                "type": "database update field",
+                "field_name": "Discord Username",
+                "param_name": "provided_user_name"
+            },
+            {
+                "type": "message",
+                "message": M_ONBOARDING_JOINED_DISCORD
             }
         ]
     }

@@ -61,6 +61,39 @@ def update_joined_discord(record_id: str, user_name: str, user_id: str):
         "Discord Username": user_name,
         "Discord Id": user_id
         })
+    
+def table_id_and_record_id_from_db_id(bot: discord.Client, db_id: str) -> Tuple[str, str]:
+    """db_id can be a discord username or an email. Returns (None, None) if not found"""
+    user_id = user_id_from_user_name(bot, db_id)
+    if user_id:
+        table_id = TABLES.onboarding_events.table_name
+        all_records = TABLES.onboarding_events.get_all()
+        matching = [r for r in all_records if r["fields"].get("Newcomer Id") == user_id]
+        if len(matching) == 0:
+            # could not find them in our database
+            return None, None
+        if  len(matching) > 1:
+            # There could be duplicates in the database. We remove the ones that have been aborted
+            # Note that there can stil be duplicates after this... For now we will return the first one
+            # TODO: better handling of this problem
+            matching = [r for r in matching if r["fields"].get("Aborted", False) == False]
+        record_id = matching[0]["id"]
+        return table_id, record_id
+    record = record_from_email(db_id)
+    if record is not None:
+        table_id = TABLES.join_pause_ai.table_name
+        return table_id, record["id"]
+    return None, None
+
+def record_from_email(email: str):
+    record = TABLES.join_pause_ai.match("Email address", email)
+    return record
+    
+def user_id_from_user_name(bot: discord.Client, user_name: str) -> str:
+    """Returns None if can't be found"""
+    user = discord.utils.get(bot.users, name=user_name)
+    if user:
+        return str(user.id)
 
 def find_user_name_id(bot: discord.Client, user_name_or_id: str) -> Tuple[str, str]:
     """
@@ -71,10 +104,9 @@ def find_user_name_id(bot: discord.Client, user_name_or_id: str) -> Tuple[str, s
         user_name = bot.get_user(int(user_id))
         return user_name, user_id
     except ValueError:
-        user_name = user_name_or_id
-        user = discord.utils.get(bot.users, name=user_name)
-        if user:
-            return user_name, str(user.id)
+        user_id = user_id_from_user_name(bot, user_name_or_id)
+        if user_id:
+            return user_name_or_id, user_id
     return None, None
 
 def update_onboarder(table: Airtable, record_id: str, user: discord.User, emoji: str):

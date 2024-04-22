@@ -66,8 +66,8 @@ The `actions` list contains a set of actions to be performed when the configurat
 The configuration system also defines some standard conditions that can be reused across multiple configuration items. These conditions are defined as dictionaries at the beginning of the configuration file.
 
 - `NOT_ABORTED`: Checks if the "Aborted" field in the database is unticked.
-- `DATABASE_WEBSITE`: Checks if the `table_id` parameter has a value of "j". Corresponds to the table "Join Pause AI"
-- `DATABASE_DISCORD`: Checks if the `table_id` parameter has a value of "o". Corresponds to the table "Onboarding Events"
+- `DATABASE_WEBSITE`: Checks if the `table_id` parameter has a value of "Join Pause AI".
+- `DATABASE_DISCORD`: Checks if the `table_id` parameter has a value of "Onboarding Events".
 - `CHECK_IS_ONBOARDER`: Checks if the current user is an onboarder.
 - `CHECK_IS_RESEARCHER`: Checks if the current user is a researcher.
 
