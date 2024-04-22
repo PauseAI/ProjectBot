@@ -29,6 +29,7 @@ CHECK_IS_RESEARCHER = {
     "message": M_ERROR_WRONG_RESEARCHER
 }
 
+VERSION = "0.3"
 CONFIG = [
     {
         "name": "thread",

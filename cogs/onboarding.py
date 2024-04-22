@@ -31,7 +31,7 @@ def get_onboarder(message: discord.Message, user: discord.User):
     if matching:
         return matching[0]["id"]
 
-def insert_newcomer(member: discord.Member) -> str:
+def insert_newcomer(member: discord.Member, pipeline_version: str) -> str:
     """
     Returns record id
     """
@@ -42,6 +42,7 @@ def insert_newcomer(member: discord.Member) -> str:
         "Newcomer Id": str(member.id),
         "Newcomer Name": member.display_name,
         "Datetime Joined": joined_at,
+        "pipeline_version": pipeline_version,
     }, typecast=True)
     return record["id"]
 

@@ -2,6 +2,7 @@ from discord.ext import commands
 from discord import Client
 import discord
 import traceback
+from cogs.onboarding_config import VERSION
 from config import CONFIG
 from airtable_client import TABLES
 from messages.m_onboarding import REMINDER
@@ -20,7 +21,7 @@ class OnboardingCog(commands.Cog):
             if get_pai_member(member):
                 # already a member
                 return
-            insert_newcomer(member)
+            insert_newcomer(member, pipeline_version=VERSION)
         except Exception as e:
             print(e, flush=True)
 
@@ -47,7 +48,7 @@ class OnboardingCog(commands.Cog):
                 params["table_id"] = "o"
                 if not record_id:
                     # this user was not in the database, we add them
-                    record_id = insert_newcomer(message.author)
+                    record_id = insert_newcomer(message.author, pipeline_version=VERSION)
                 print("Processing reaction to new_member")
                 record = TABLES.onboarding_events.get(record_id)
                 await ONBOARDING_MANAGER.reaction_trigger(user, message, emoji, record, TABLES.onboarding_events, params)
@@ -61,6 +62,9 @@ class OnboardingCog(commands.Cog):
                 record = TABLES.join_pause_ai.get(record_id)
                 if not record:
                     await user.send(f"There seems to be an error, this person is not in our database anymore, please contact an administrator.")
+                if record["fields"].get("pipeline_version", "") == "":
+                    # There is no pipeline version attached to this person, we update that
+                    TABLES.join_pause_ai.update(record_id, {"pipeline_version": VERSION})
                 await ONBOARDING_MANAGER.reaction_trigger(user, message, emoji, record, TABLES.join_pause_ai, params)
           
         except Exception as e:
@@ -131,6 +135,14 @@ class OnboardingCog(commands.Cog):
 
     @commands.command(name="onboarding", description="The onboarding pipeline")
     async def onboarding(self, context: commands.Context, subcommand: str, db_id: str, user_name_or_id: str = None):
+        """
+        Use this command to move a user to the next stage of the pipeline.
+        The available subcommands are:
+        - replied
+        - met
+        - checkin
+        - email 
+        """
         try:
             print(f"Command onboarding {subcommand}")
             table_id, record_id = db_id.split("-")
@@ -156,6 +168,11 @@ class OnboardingCog(commands.Cog):
 
         except Exception as e:
             print(traceback.format_exc(), flush=True)
+
+    @commands.command(name="version")
+    async def version(self, context: commands.Context):
+        """Returns the current version of the onboarding pipeline"""
+        await context.author.send(VERSION)
 
     @commands.command(name="onboardinglist", description="List of people I am onboarding")
     async def onboardinglist(self, context: commands.Context):
