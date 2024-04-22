@@ -172,14 +172,9 @@ class OnboardingCog(commands.Cog):
             provided_user_name = None
             provided_user_display_name = None
             if user_name is not None:
-                """
-                if table_id != TABLES.join_pause_ai.table_name:
-                    await context.author.send("Error: A username should only be passed for a website signup")
-                    return
-                """
                 provided_user_id = user_id_from_user_name(self.bot, user_name)
                 if provided_user_id is None:
-                    context.author.send("Error: the user_name you have provided does not exist")
+                    await context.author.send("Error: the user_name you have provided does not exist")
                     return
                 provided_user_name = user_name
                 provided_user = self.bot.get_user(int(provided_user_id))

@@ -19,6 +19,7 @@ def format_message(message: str, record: Dict, params: Dict) -> str:
         is_vip = fields.get("Is VIP", False),
         country = fields.get("Country", ""),
         city = fields.get("City", ""),
+        linkedin = fields.get("Linked", ""),
         how_to_help = fields.get("How do you want to help?", ""),
         types_of_action = fields.get("What types of action(s) would you be interested in?", ""),
         hours_per_week = fields.get("How many hours per week could you spend volunteering with PauseAI?", ""),

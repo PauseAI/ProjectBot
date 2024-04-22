@@ -388,11 +388,11 @@ CONFIG = [
         ]
     },
     {
-        "name": "onboarding_replied",
+        "name": "onboarding_contributor",
         "trigger": {
             "type": "command",
             "command": "onboarding",
-            "subcommand": "replied"
+            "subcommand": "contributor"
         },
         "conditions": [
             NOT_ABORTED,
@@ -402,11 +402,11 @@ CONFIG = [
         "actions": [
             {
                 "type": "database update tick",
-                "field_name": "Initial Reply"
+                "field_name": "Contributor"
             },
             {
                 "type": "message",
-                "message": M_ONBOARDING_REPLIED
+                "message": M_ONBOARDING_CONTRIBUTOR
             }
         ]
     },
@@ -423,8 +423,8 @@ CONFIG = [
             CHECK_IS_ONBOARDER,
             {
                 "type": "database check ticked",
-                "field_name": "Initial Reply",
-                "message": M_ERROR_NOT_REPLIED,
+                "field_name": "Contributor",
+                "message": M_ERROR_NOT_CONTRIBUTOR,
             }
         ],
         "actions": [
