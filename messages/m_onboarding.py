@@ -67,10 +67,8 @@ You also want to get them to:
 - join the next onboarding meeting
 - point them to a "new joiner guide" (does not exist yet)
 
-Research Output:
-```
-{research_result}
-```
+Research Output ({researcher_name}):
+```{research_result} ```
 
 We recommend that you use this message
 ```
@@ -100,10 +98,8 @@ Please contact them via email. If you need inspiration, you can find templates [
 **Discord Username:** {discord_username}
 **Hours per week:** {hours_per_week}
 **Email Address:** ```{email}```
-Research Output:
-```
-{research_result}
-```
+Research Output ({researcher_name}):
+```{research_result} ```
 Once you have emailed them, use the following command to move on to the next stage:
 ```!onboarding emailed {db_id}```
 """
