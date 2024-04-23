@@ -28,7 +28,7 @@ Please refer to the [onboarding manual](https://docs.google.com/document/d/1aG4Z
 **Joined Discord:** {joined_discord}
 **Discord Username:** {discord_username}
 **Hours per week:** {hours_per_week}
-**Email Address:** ```{email}```
+**Email Address:** ```{email_address}```
 Once you have researched them, please log your findings with the following command:
 ```
 !research log {db_id} <your findings>
@@ -97,7 +97,7 @@ Please contact them via email. If you need inspiration, you can find templates [
 **Joined Discord:** {joined_discord}
 **Discord Username:** {discord_username}
 **Hours per week:** {hours_per_week}
-**Email Address:** ```{email}```
+**Email Address:** ```{email_address}```
 Research Output ({researcher_name}):
 ```{research_result} ```
 Once you have emailed them, use the following command to move on to the next stage:
