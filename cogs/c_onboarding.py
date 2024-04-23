@@ -2,14 +2,14 @@ from discord.ext import commands
 from discord import Client
 import discord
 import traceback
-from cogs.onboarding_config import VERSION
+from onboarding.onboarding_config import VERSION
 from config import CONFIG
 from airtable_client import TABLES
 from messages.m_onboarding import REMINDER
-from cogs.onboarding import (find_user_name_id, format_message_discord, 
+from onboarding.utils import (format_message_discord, 
                              get_pai_member, insert_newcomer, record_id_from_message,
                              table_id_and_record_id_from_db_id, user_id_from_user_name)
-from cogs.onboarding_manager import ONBOARDING_MANAGER
+from onboarding.onboarding_manager import ONBOARDING_MANAGER
 
 
 class OnboardingCog(commands.Cog):

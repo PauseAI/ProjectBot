@@ -2,8 +2,8 @@ from typing import Dict
 import discord
 from airtable import Airtable
 
-from cogs.onboarding import reset_onboarder, reset_researcher, update_onboarder, update_researcher
-from cogs.onboarding_config import CONFIG
+from onboarding.utils import reset_onboarder, reset_researcher, update_onboarder, update_researcher
+from onboarding.onboarding_config import CONFIG
 
 class ConditionException(Exception):
     pass
