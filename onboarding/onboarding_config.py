@@ -53,10 +53,6 @@ CONFIG = [
         },
         "actions": [
             {
-                "type": "database update tick",
-                "field_name": "Aborted"
-            },
-            {
                 "type": "message",
                 "message": M_REJOIN,
             }

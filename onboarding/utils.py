@@ -19,18 +19,6 @@ def get_pai_member(member: discord.Member) -> str:
     if matching:
         return matching[0]["id"]
 
-def get_onboarder(message: discord.Message, user: discord.User):
-    """
-    Returns the record id if the pair (onboarder, message) is found or None
-    """
-    records = TABLES.onboarding_events.get_all()
-    matching = [r for r in records 
-                if r["fields"].get("Message Id", "") == str(message.id)
-                and r["fields"].get("Onboarder Id", "") == str(user.id)
-                ]
-    if matching:
-        return matching[0]["id"]
-
 def insert_newcomer(member: discord.Member, pipeline_version: str) -> str:
     """
     Returns record id
