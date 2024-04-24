@@ -378,6 +378,18 @@ CONFIG = [
                 "type": "database reset onboarder"
             },
             {
+                "type": "database update untick",
+                "field_name": "Contributor"
+            },
+            {
+                "type": "database update untick",
+                "field_name": "Face Meeting"
+            },
+            {
+                "type": "database update untick",
+                "field_name": "Check In"
+            },
+            {
                 "type": "message",
                 "message": M_UNDO_START_ONBOARDING
             }
