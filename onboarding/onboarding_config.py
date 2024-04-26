@@ -342,11 +342,11 @@ CONFIG = [
                 "type": "database check no onboarder",
                 "message": M_ERROR_WRONG_ONBOARDER
             },
-            {
-                "type": "database check ticked",
-                "field_name": "Researched",
-                "message": M_ERROR_NOT_RESEARCHED
-            },
+            # {
+            #     "type": "database check ticked",
+            #     "field_name": "Researched",
+            #     "message": M_ERROR_NOT_RESEARCHED
+            # },
         ],
         "actions": [
             {
