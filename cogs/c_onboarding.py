@@ -58,7 +58,7 @@ class OnboardingCog(commands.Cog):
                 if record_id is None:
                     # Somebody has reacted to a regular message
                     return
-                record = TABLES.join_pause_ai.get(record_id)
+                record = TABLES.members.get(record_id)
                 if not record:
                     await user.send(f"There seems to be an error, this person is not in our database anymore, please contact an administrator.")
                 email = record["fields"].get("Email address")
@@ -67,12 +67,12 @@ class OnboardingCog(commands.Cog):
                     await user.send("Error: this user has not filled in his email address")
                     return
                 params["db_id"] = email
-                params["table_id"] = TABLES.join_pause_ai.table_name
+                params["table_id"] = TABLES.members.table_name
                 if record["fields"].get("pipeline_version", "") == "":
                     # There is no pipeline version attached to this person, we update that
-                    TABLES.join_pause_ai.update(record_id, {"pipeline_version": VERSION})
+                    TABLES.members.update(record_id, {"pipeline_version": VERSION})
                 print("Processing reaction to website sign up")
-                await ONBOARDING_MANAGER.reaction_trigger(user, message, emoji, record, TABLES.join_pause_ai, params)
+                await ONBOARDING_MANAGER.reaction_trigger(user, message, emoji, record, TABLES.members, params)
           
         except Exception as e:
             print(traceback.format_exc(), flush=True)
@@ -108,7 +108,7 @@ class OnboardingCog(commands.Cog):
                 if record_id is None:
                     # Somebody has reacted to a regular message
                     return
-                record = TABLES.join_pause_ai.get(record_id)
+                record = TABLES.members.get(record_id)
                 if not record:
                     await user.send(f"There seems to be an error, this person is not in our database anymore, please contact an administrator.")
                 email = record["fields"].get("Email address")
@@ -117,8 +117,8 @@ class OnboardingCog(commands.Cog):
                     await user.send("Error: this user has not filled in his email address")
                     return
                 params["db_id"] = email
-                params["table_id"] = TABLES.join_pause_ai.table_name
-                await ONBOARDING_MANAGER.clear_reaction_trigger(user, message, emoji, record, TABLES.join_pause_ai, params)
+                params["table_id"] = TABLES.members.table_name
+                await ONBOARDING_MANAGER.clear_reaction_trigger(user, message, emoji, record, TABLES.members, params)
 
         except Exception as e:
             print(traceback.format_exc(), flush=True)
@@ -143,8 +143,8 @@ class OnboardingCog(commands.Cog):
             user_id = None
             user = None
             email = None
-            if table_id == TABLES.join_pause_ai.table_name:
-                table = TABLES.join_pause_ai
+            if table_id == TABLES.members.table_name:
+                table = TABLES.members
                 email = db_id
             elif table_id == TABLES.onboarding_events.table_name:
                 table = TABLES.onboarding_events

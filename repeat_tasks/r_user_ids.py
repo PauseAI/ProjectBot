@@ -9,7 +9,7 @@ async def resolve_user_ids():
     an identifier. This task derives the user id from the user name and populates
     the relevant tables"""
     try:
-        for table in [TABLES.join_pause_ai, TABLES.volunteers]:
+        for table in [TABLES.members, TABLES.volunteers]:
             records = table.get_all()
             for record in records:
                 user_name = record["fields"].get("Discord Username")

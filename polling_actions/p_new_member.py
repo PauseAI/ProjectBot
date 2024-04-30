@@ -7,7 +7,7 @@ from config import CONFIG
 @join_poller.on_addition
 async def on_new_member(record_id: str):
     try:
-        record = TABLES.join_pause_ai.get(record_id)
+        record = TABLES.members.get(record_id)
         onboarding_channel = client.get_channel(CONFIG.onboarding_channel_id)
         how_to_help = record["fields"].get("How do you want to help?", "")
         how_to_help_truncated = how_to_help[:300]

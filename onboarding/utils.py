@@ -44,7 +44,7 @@ def update_joined(record_id: str, message: discord.Message):
     )
 
 def update_joined_discord(record_id: str, user_name: str, user_id: str):
-    TABLES.join_pause_ai.update(record_id, {
+    TABLES.members.update(record_id, {
         "JoinedDiscord": "Yes",
         "Discord Username": user_name,
         "Discord Id": user_id
@@ -69,12 +69,12 @@ def table_id_and_record_id_from_db_id(bot: discord.Client, db_id: str) -> Tuple[
         return table_id, record_id
     record = record_from_email(db_id)
     if record is not None:
-        table_id = TABLES.join_pause_ai.table_name
+        table_id = TABLES.members.table_name
         return table_id, record["id"]
     return None, None
 
 def record_from_email(email: str):
-    record = TABLES.join_pause_ai.match("Email address", email)
+    record = TABLES.members.match("Email address", email)
     return record
     
 def user_id_from_user_name(bot: discord.Client, user_name: str) -> str:

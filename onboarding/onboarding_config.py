@@ -12,7 +12,7 @@ NOT_ABORTED = {
 DATABASE_WEBSITE = {
     "type": "check param value",
     "param_name": "table_id",
-    "param_value": TABLES.join_pause_ai.table_name,
+    "param_value": TABLES.members.table_name,
     "message": M_ERROR_WEBSITE
 }
 DATABASE_DISCORD = {

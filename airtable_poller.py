@@ -59,5 +59,5 @@ async def start_pollers():
     from polling_actions import p_new_member
     await asyncio.gather(*[p.start() for p in POLLERS])
 
-join_poller = AirtablePoller("Join Pause AI", config_name="polling_interval")
+join_poller = AirtablePoller(TABLES.members.table_name, config_name="polling_interval")
 POLLERS.append(join_poller)
