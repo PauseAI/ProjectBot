@@ -7,7 +7,8 @@ TABLE_NAMES = [
     "Onboarding Events",
     "Members",
     "Volunteers",
-    "Teams"
+    "Teams",
+    "Actions"
 ]
 
 class Tables:
@@ -50,5 +51,9 @@ class Tables:
     @property
     def teams(self) -> Airtable:
         return self.get_table("Teams")
+    
+    @property
+    def actions(self) -> Airtable:
+        return self.get_table("Actions")
 
 TABLES = Tables()

@@ -7,6 +7,9 @@ airtable_base_id:
 onboarding_channel_id: 
   prod: 1174807044990193775
   staging: 1214198954321907845
+kudos_channel_id:
+  prod: 1233038219650535484
+  staging: 1214198954321907845
 polling_interval: 
   prod: 300
   staging: 10

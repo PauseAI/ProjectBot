@@ -55,6 +55,10 @@ class Config:
         return self.get("onboarding_channel_id")
     
     @property
+    def kudos_channel_id(self) -> int:
+        return self.get("kudos_channel_id")
+    
+    @property
     def polling_interval(self) -> int:
         return self.get("polling_interval")
     

@@ -55,9 +55,18 @@ class AirtablePoller:
         self.listeners_delete.append(func)
         return func
 
+# ADDING A NEW POLLER
+# Create a file for the action called by your poller under the 
+# polling_actions directory
+# Import this file in start_pollers below
+# Instantiate your AirtablePoller below
+# Add it to the POLLERS list
+
 async def start_pollers():
-    from polling_actions import p_new_member
+    from polling_actions import p_new_member, p_kudos
     await asyncio.gather(*[p.start() for p in POLLERS])
 
 join_poller = AirtablePoller(TABLES.members.table_name, config_name="polling_interval")
-POLLERS.append(join_poller)
+actions_poller = AirtablePoller(TABLES.actions.table_name, config_name="polling_interval")
+POLLERS.extend([
+    join_poller, actions_poller])
