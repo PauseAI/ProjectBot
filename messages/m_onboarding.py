@@ -15,7 +15,7 @@ M_ERROR_WEBSITE = "Error: this stage is for a website onboarding only, not a dis
 M_ERROR_DISCORD = "Error: this stage is for a discord onboarding only, not a website onboarding"
 
 M_START_RESEARCH_WEBSITE = """🌞Thanks for starting the research on {name}!🌞
-Please refer to the [onboarding manual](https://docs.google.com/document/d/1aG4Z4x-qIs2uAcy5DS8bNtYikleLOp4ACvoDFlzCPyI) if you do not know what to look for.
+Please refer to the [onboarding manual](https://docs.google.com/document/d/1Upr0z_B_SWCAGZTzv2DWHVFuJwKtlrmZGmH0WqQKRvU/edit?usp=drive_link) if you do not know what to look for.
 ## About Them
 **Name:** {name}
 **Country:** {country}
@@ -35,7 +35,7 @@ Once you have researched them, please log your findings with the following comma
 ```
 """
 M_START_RESEARCH_DISCORD = """🌞Thanks for starting the research on {name}!🌞
-Please refer to the [onboarding manual](https://docs.google.com/document/d/1aG4Z4x-qIs2uAcy5DS8bNtYikleLOp4ACvoDFlzCPyI) if you do not know what to look for.
+Please refer to the [onboarding manual](https://docs.google.com/document/d/1Upr0z_B_SWCAGZTzv2DWHVFuJwKtlrmZGmH0WqQKRvU/edit) if you do not know what to look for.
 
 Once you have researched them, please log your findings with the following command:
 ```
@@ -84,7 +84,7 @@ If they are willing to contribute, move them to the next stage using the followi
 M_START_ONBOARDING_WEBSITE = """🌞Thank you so much for onboarding {name}🌞!{vip_sentence}
 ## Onboarding Guide - Website
 At this stage your goal is to get {name} to join our discord community - this is where the magic happens!
-Please contact them via email. If you need inspiration, you can find templates [here](https://docs.google.com/document/d/1Psbr38f7BxhRREndRYo_tn_d6Ta0UE_PoXX8wXqnhjQ/edit)
+Please contact them via email. If you need inspiration, you can find templates [here](https://docs.google.com/document/d/1ehsdQ75s9mo7mtv_BnDGfe--GiQ06ItzfnYzudobRlU/edit)
 ## About Them
 **Name:** {name}
 **Country:** {country}
@@ -122,7 +122,7 @@ Also make sure that they have:
 - Writen an introduction
 - Attended an onboarding meeting (or planning to attend)
 
-If you need help, check out this detailed [guide](https://docs.google.com/document/d/1NHf1fvx5k6bzSr7dsn-1fyqINUZPAacvk0LL6CYY6iE/edit) for the 1 on 1 meeting
+If you need help, check out this detailed [guide](https://docs.google.com/document/d/1kZWy3USbQxbwQL947jtpfr-Hg5Wfq_fQzpOiCmA5zZI/edit) for the 1 on 1 meeting
 The main goal is to get them motivated, oriented, and willing to join a team or project. 
 
 If you need a shortlist of our most important projects, you can use this command:
