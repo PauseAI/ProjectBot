@@ -52,10 +52,9 @@ CONFIG = [
             "emoji": "🔁"
         },
         "actions": [
-            {
-                "type": "message",
-                "message": M_REJOIN,
-            }
+            # Needs to exist even though there is no action,
+            # otherwise this emoji would be interpreted as 
+            # an onboarding
         ]
     },
     {
