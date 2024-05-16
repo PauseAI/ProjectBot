@@ -145,22 +145,7 @@ CONFIG = [
             "type": "unreact",
             "emoji": "🔁"
         },
-        "conditions": [
-            {
-                "type": "database check ticked",
-                "field_name": "Aborted",
-                "message": M_ERROR_UNDO_ABORT
-            }
-        ],
         "actions": [
-            {
-                "type": "database update untick",
-                "field_name": "Aborted"
-            },
-            {
-                "type": "message",
-                "message": M_UNDO_ABORT
-            }
         ]
     },
     {
