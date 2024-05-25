@@ -5,7 +5,7 @@ import discord
 from discord_tools import confirm_dialogue
 from custom_decorators import admin_only
 from airtable_client import TABLES
-from data_model import Project, Task
+from data_model import Project
 
 
 class TrackCog(commands.Cog):

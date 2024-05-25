@@ -64,7 +64,7 @@ def table_id_and_record_id_from_db_id(bot: discord.Client, db_id: str) -> Tuple[
             # There could be duplicates in the database. We remove the ones that have been aborted
             # Note that there can stil be duplicates after this... For now we will return the first one
             # TODO: better handling of this problem
-            matching = [r for r in matching if r["fields"].get("Aborted", False) == False]
+            matching = [r for r in matching if r["fields"].get("Aborted", False) is False]
         record_id = matching[0]["id"]
         return table_id, record_id
     record = record_from_email(db_id)

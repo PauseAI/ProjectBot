@@ -60,7 +60,7 @@ class OnboardingCog(commands.Cog):
                     return
                 record = TABLES.members.get(record_id)
                 if not record:
-                    await user.send(f"There seems to be an error, this person is not in our database anymore, please contact an administrator.")
+                    await user.send("There seems to be an error, this person is not in our database anymore, please contact an administrator.")
                 email = record["fields"].get("Email address")
                 if email is None:
                     # That's problematic, every record in this table should have an email address
@@ -74,7 +74,7 @@ class OnboardingCog(commands.Cog):
                 print("Processing reaction to website sign up")
                 await ONBOARDING_MANAGER.reaction_trigger(user, message, emoji, record, TABLES.members, params)
           
-        except Exception as e:
+        except Exception:
             print(traceback.format_exc(), flush=True)
 
     @commands.Cog.listener()
@@ -110,7 +110,7 @@ class OnboardingCog(commands.Cog):
                     return
                 record = TABLES.members.get(record_id)
                 if not record:
-                    await user.send(f"There seems to be an error, this person is not in our database anymore, please contact an administrator.")
+                    await user.send("There seems to be an error, this person is not in our database anymore, please contact an administrator.")
                 email = record["fields"].get("Email address")
                 if email is None:
                     # That's problematic, every record in this table should have an email address
@@ -120,7 +120,7 @@ class OnboardingCog(commands.Cog):
                 params["table_id"] = TABLES.members.table_name
                 await ONBOARDING_MANAGER.clear_reaction_trigger(user, message, emoji, record, TABLES.members, params)
 
-        except Exception as e:
+        except Exception:
             print(traceback.format_exc(), flush=True)
 
     async def handle_command(self, context: commands.Context, command: str, subcommand: str, 
@@ -168,7 +168,7 @@ class OnboardingCog(commands.Cog):
             
             await ONBOARDING_MANAGER.command_trigger(command, subcommand, context.author, user, record, table, params)
 
-        except Exception as e:
+        except Exception:
             print(traceback.format_exc(), flush=True)
 
     @commands.command(name="research", description="Logging research about a user")
@@ -197,7 +197,7 @@ class OnboardingCog(commands.Cog):
         """
         try:
             await self.handle_command(context, "onboarding", subcommand, db_id, user_name=user_name)
-        except Exception as e:
+        except Exception:
             print(traceback.format_exc(), flush=True)
 
     @commands.command(name="version")

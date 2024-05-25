@@ -1,6 +1,7 @@
 from scripts.joining_chart import plot_arrivals
 from airtable_client import TABLES
-import sys, io
+import sys
+import io
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 

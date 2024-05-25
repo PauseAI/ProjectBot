@@ -1,7 +1,6 @@
-from airtable_client import TABLES
 import matplotlib.pyplot as plt
 import pandas as pd
-from datetime import datetime, date
+from datetime import date
 
 def plot_arrivals(data, source: str, date_field: str = "Datetime Joined", per_week: bool = False):
     # Assuming the data is stored in a variable called 'data'
