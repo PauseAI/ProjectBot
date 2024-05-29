@@ -5,8 +5,6 @@ from airtable_poller import start_pollers
 from repeater import start_repeaters
 from bot import start_bot
 from config import CONFIG
-import sys
-import io
 
 async def main():
     await asyncio.gather(start_bot(), start_pollers(), start_repeaters())

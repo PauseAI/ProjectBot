@@ -1,5 +1,6 @@
 import asyncio
-from typing import Callable, List
+from typing import Callable
+
 from airtable_client import TABLES
 from config import CONFIG
 
@@ -63,7 +64,7 @@ class AirtablePoller:
 # Add it to the POLLERS list
 
 async def start_pollers():
-    from polling_actions import p_new_member, p_kudos
+    from polling_actions import p_kudos, p_new_member  # noqa: F401 -- these are needed to start the async pollers
     await asyncio.gather(*[p.start() for p in POLLERS])
 
 join_poller = AirtablePoller(TABLES.members.table_name, config_name="polling_interval")

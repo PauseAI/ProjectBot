@@ -50,13 +50,13 @@ class OnboardingManager:
         if emoji in self.reserved_emojis:
             return f"react({emoji})"
         else:
-            return f"react()"
+            return "react()"
         
     def trigger_signature_from_unreact(self, emoji: str) -> str:
         if emoji in self.reserved_emojis:
             return f"unreact({emoji})"
         else:
-            return f"unreact()"
+            return "unreact()"
     
     def trigger_signature_from_command(self, command: str, subcommand: str) -> str:
         return f"command({command},{subcommand})"
