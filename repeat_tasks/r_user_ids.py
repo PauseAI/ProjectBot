@@ -12,25 +12,25 @@ async def resolve_user_ids():
         for table in [TABLES.members, TABLES.volunteers]:
             records = table.get_all()
             for record in records:
-                user_name = record["fields"].get("Discord Username")
-                user_id = record["fields"].get("Discord Id")
+                user_name = record["fields"].get("discord_username")
+                user_id = record["fields"].get("discord_id")
                 if user_name and not user_id:
                     user = discord.utils.get(client.users, name=user_name.lower())
                     if user:
                         table.update(record["id"], {
-                            "Discord Username": user_name.lower(),
-                            "Discord Id": str(user.id)})
+                            "discord_username": user_name.lower(),
+                            "discord_id": str(user.id)})
                         continue
                     # This was not the username, let's try the display name
                     user = discord.utils.get(client.users, display_name=user_name)
                     if user:
-                        table.update(record["id"], {"Discord Id": str(user.id)})
+                        table.update(record["id"], {"discord_id": str(user.id)})
                         continue
                 if user_id and not user_name:
                     try:
                         user = client.get_user(int(user_id))
                         if user:
-                            table.update(record["id"], {"Discord Username": user.name})
+                            table.update(record["id"], {"discord_username": user.name})
                     except ValueError:
                         pass
     except Exception as e:

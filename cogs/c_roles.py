@@ -27,7 +27,7 @@ class RolesCog(commands.Cog):
                 new_role = next(role for role in after.roles if role not in before.roles)
                 if new_role.name in team_roles.keys():
                     print(f"Role {new_role.name} added to {after.name}")
-                    volunteer_record = TABLES.volunteers.match("Discord Id", str(after.id))
+                    volunteer_record = TABLES.volunteers.match("discord_id", str(after.id))
                     if volunteer_record:
                         TABLES.volunteers.update(volunteer_record["id"],
                             {
@@ -44,7 +44,7 @@ class RolesCog(commands.Cog):
                 old_role = next(role for role in before.roles if role not in after.roles) 
                 if old_role.name in team_roles.keys():
                     print(f"Role {old_role.name} removed to {after.name}")
-                    volunteer_record = TABLES.volunteers.match("Discord Id", str(after.id))
+                    volunteer_record = TABLES.volunteers.match("discord_id", str(after.id))
                     if volunteer_record:
                         prev_roles = volunteer_record["fields"].get("member_of", [])
                         new_roles = [r for r in prev_roles if r != team_roles[old_role.name]]

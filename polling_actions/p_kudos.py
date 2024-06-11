@@ -13,7 +13,7 @@ async def on_new_action(record_id: str):
         action_type = record["fields"].get("action_type")
         volunteer_name = record["fields"].get("volunteer_name")
         matching_volunteer = [
-           r["fields"].get("Discord Id") 
+           r["fields"].get("discord_id") 
            for r in volunteers 
            if r["fields"].get("Name") == volunteer_name]
         if matching_volunteer and matching_volunteer[0]:
