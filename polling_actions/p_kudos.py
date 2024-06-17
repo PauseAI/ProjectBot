@@ -8,6 +8,9 @@ from config import CONFIG
 async def on_new_action(record_id: str):
     try:
         record = TABLES.actions.get(record_id)
+        if not record["fields"].get("publish"):
+            # We don't send a kudos message when the checkbox isn't checked
+            return
         volunteers = TABLES.volunteers.get_all()
         kudos_channel = client.get_channel(CONFIG.kudos_channel_id)
         action_type = record["fields"].get("action_type")
