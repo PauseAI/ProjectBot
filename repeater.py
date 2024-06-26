@@ -22,7 +22,7 @@ class Repeater:
         return func
 
 async def start_repeaters():
-    from repeat_tasks import r_user_ids  # noqa: F401 -- this is needed to start the async repeater
+    from repeat_tasks import r_user_ids, r_volunteer_member_linking  # noqa: F401 -- this is needed to start the async repeater
     await asyncio.gather(*[repeater.start() for repeater in REPEATERS])
 
 slow_repeater = Repeater("slow_repeat_interval")
