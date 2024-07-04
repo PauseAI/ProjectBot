@@ -27,3 +27,6 @@ admin_user_ids:
     - 346706777305251840 # Chris G
   staging:
     - 252771041464680449 # Maxime F
+wants_to_help_role_id:
+  prod: 1247238509064880218
+  staging: 0

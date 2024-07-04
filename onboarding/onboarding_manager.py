@@ -2,7 +2,7 @@ from typing import Dict
 import discord
 from airtable import Airtable
 
-from onboarding.utils import reset_onboarder, reset_researcher, update_onboarder, update_researcher
+from onboarding.utils import reset_onboarder, reset_researcher, update_onboarder, update_researcher, remove_role, add_role
 from onboarding.onboarding_config import CONFIG
 
 class ConditionException(Exception):
@@ -102,7 +102,7 @@ class OnboardingManager:
         signature = self.trigger_signature_from_command(command, subcommand)
         await self.handle_stage(signature, user, message, None, record, table, params)
 
-    def solve_condition(self, condition: Dict, record: Dict, user: discord.User, params: Dict) -> bool:
+    def solve_condition(self, condition: Dict, record: Dict, user: discord.User, message: discord.Message, params: Dict) -> bool:
         satisfied = False
         if condition["type"] == "database check ticked":
             satisfied = record["fields"].get(condition["field_name"], False)
@@ -116,6 +116,8 @@ class OnboardingManager:
             satisfied = record["fields"].get("Researcher Id", "") == str(user.id)
         elif condition["type"] == "database check is onboarder":
             satisfied = record["fields"].get("Onboarder Id", "") == str(user.id)
+        elif condition["type"] == "discord has role":
+            satisfied = not not message.author.get_role(condition["role_id"])
         elif condition["type"] == "check param value":
             satisfied = params[condition["param_name"]] == condition["param_value"]
         else:
@@ -135,7 +137,7 @@ class OnboardingManager:
         for condition in stage.get("conditions", []):
             print(f"Condition: {condition['type']}")
             try:
-                satisfied = self.solve_condition(condition, record, user, params)
+                satisfied = self.solve_condition(condition, record, user, message, params)
             except ConditionException:
                 print(f"Error: unknown condition type: {condition['type']}")
                 return
@@ -151,7 +153,7 @@ class OnboardingManager:
                 condition = action["condition"]
                 print(f"Evaluating condition attached to action: {condition['type']}")
                 try:
-                    satisfied = self.solve_condition(condition, record, user, params)
+                    satisfied = self.solve_condition(condition, record, user, message, params)
                 except ConditionException:
                     print(f"Error: unknown condition type: {condition['type']}")
                     return
@@ -181,6 +183,10 @@ class OnboardingManager:
                 table.update(record["id"], {action["field_name"]: params[action["param_name"]]}, typecast=True)
             elif action["type"] == "message":
                 await user.send(format_message(action["message"], record, params))
+            elif action["type"] == "discord remove role":
+                await remove_role(message.author, action["role_id"])
+            elif action["type"] == "discord add role":
+                await add_role(message.author, action["role_id"])
             else:
                 print(f"Error: unknown action type: {action['type']}")
                 return

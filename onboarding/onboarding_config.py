@@ -1,5 +1,6 @@
 from messages.m_onboarding import *
 from airtable_client import TABLES
+from config import CONFIG
 
 # -------------
 # STANDARD CONDITIONS
@@ -337,6 +338,18 @@ CONFIG = [
                 "type": "database set onboarder"
             },
             {
+                "type": "database update tick",
+                "condition": {
+                    "type": "discord has role",
+                    "role_id": CONFIG.wants_to_help_role_id
+                },
+                "field_name": "Wants to help"
+            },
+            {
+                "type": "discord remove role",
+                "role_id": CONFIG.wants_to_help_role_id
+            },
+            {
                 "type": "message",
                 "condition": DATABASE_WEBSITE,
                 "message": M_START_ONBOARDING_WEBSITE
@@ -372,6 +385,14 @@ CONFIG = [
             {
                 "type": "database update untick",
                 "field_name": "Check In"
+            },
+            {
+                "type": "discord add role",
+                "condition": {
+                    "type": "database check ticked",
+                    "field_name": "Wants to help"
+                },
+                "role_id": CONFIG.wants_to_help_role_id
             },
             {
                 "type": "message",
