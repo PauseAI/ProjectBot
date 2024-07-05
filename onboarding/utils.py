@@ -177,3 +177,11 @@ def format_message_discord(message: str, record: Dict, **kwargs) -> str:
         user_id=record["fields"].get("Newcomer Id"),
         **kwargs
     )
+
+async def remove_role(member: discord.Member, role_id: int):
+    role = member.guild.get_role(role_id)
+    await member.remove_roles(role)
+
+async def add_role(member: discord.Member, role_id):
+    role = member.guild.get_role(role_id)
+    await member.add_roles(role)

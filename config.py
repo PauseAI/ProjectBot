@@ -81,5 +81,9 @@ class Config:
     @property
     def slow_repeat_interval(self) -> int:
         return self.get("slow_repeat_interval")
+    
+    @property
+    def wants_to_help_role_id(self) -> int:
+        return self.get("wants_to_help_role_id")
 
 CONFIG = Config("config.yml", "secrets.yml")
