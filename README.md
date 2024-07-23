@@ -56,10 +56,15 @@ conda activate projectbot
 Create a secrets.yml file in the project directory with your Discord bot token and Notion integration details:
 
 ```yaml
-discord_bot_token: "YOUR_DISCORD_BOT_TOKEN"
-notion_integration_token: "YOUR_NOTION_INTEGRATION_TOKEN"
-notion_database_id: "YOUR_NOTION_DATABASE_ID"
-airtable_api_key: "YOUR_AIRTABLE_API_KEY"
+DISCORD_BOT_SECRET:
+  staging: "YOUR_DISCORD_BOT_TOKEN_FOR_TESTING"
+  prod: "YOUR_DISCORD_BOT_TOKEN_FOR_PRODUCTION"
+AIRTABLE_TOKEN:
+  staging: "YOUR_AIRTABLE_TOKEN_FOR_TESTING"
+  prod: "YOUR_AIRTABLE_TOKEN_FOR_PRODUCTION"
+OPENAI_API_KEY:
+  staging: "YOUR_OPENAI_API_KEY_FOR_TESTING"
+  prod: "YOUR_OPENAI_API_KEY_FOR_PRODUCTION"
 ```
 
 Make sure to replace the placeholders with your actual tokens and IDs.
@@ -71,7 +76,7 @@ Make sure to replace the placeholders with your actual tokens and IDs.
 With the Conda environment activated and the secrets configured, start the bot by running:
 
 ```sh
-python bot.py
+python main.py
 ```
 
 2. **Using the Bot**
