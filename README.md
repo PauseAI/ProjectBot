@@ -2,6 +2,8 @@
 
 This repository contains a python script running a Discord bot that fetches information from messages in forum channels and creates corresponding entries in a Notion database. It's designed to help with project management, allowing users to quickly transfer and track project details from Discord discussions to a structured Notion database.
 
+**STATUS: OFFLINE, UNMAINTAINED**. As of October 29th 2024, this application is no longer available online. We haven't been able to find a maintainer for this project.
+
 ## Prerequisites
 
 Before you begin, ensure you have the following:
